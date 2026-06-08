@@ -63,6 +63,13 @@
     function markAsSubmitted(token) {
       localStorage.setItem(SUBMITTED_KEY + '-' + token, "true");
     }
+    function markDays(token, day1, day2) {
+      localStorage.setItem(SUBMITTED_KEY + '-days-' + token, JSON.stringify({day1,day2}));
+    }
+    function getSavedDays(token) {
+      try { const d = localStorage.getItem(SUBMITTED_KEY + '-days-' + token); return d ? JSON.parse(d) : null; }
+      catch { return null; }
+    }
 
     const ROSE_HOTEL_PHOTO = "https://lh3.googleusercontent.com/place-photos/AJRVUZO0TCs1gOokOCY-aakssQata_UXZ5lrGpD7d93MyE7xnzLhaXugD5biu0vpJBMpwlGOuDadhCqywtgxhMNSjxJizdOtxQMCP4nNetfpE6mcR9yyJtpnnfuubXQBj3xPRU_GurtwXyEeKkOdg4Q=s4800-w800-h600";
     const FITZ_PHOTO = "https://lh3.googleusercontent.com/place-photos/AJRVUZNygulMskpPXKXSujsrAIT9HKUAsY9bQiDBC58yj19cA71RLiziW7xXB-geuykem-pIJkrRxjS4mrrcbnOAY2p0RCSRNnBiciAbmJ4xLBWJ0UmsUMDoqKMWCvrL-8wWi4_A3vPEg8gX1Pdmbw=s4800-w800-h600";
@@ -144,6 +151,15 @@
       const [submitted, setSubmitted] = useState(hasAlreadySubmitted(urlToken));
       const [lastEntry, setLastEntry] = useState(null);
       const [form, setForm] = useState({name:urlName,email:"",attendingDay:null,attendingDay2:null,allergies:"",message:""});
+
+      const savedDays = submitted ? (lastEntry ? {day1:lastEntry.attendingDay,day2:lastEntry.attendingDay2} : getSavedDays(urlToken)) : null;
+      const heroMsg = submitted && savedDays
+        ? savedDays.day1 && savedDays.day2 ? "See you on the 24th & 25th! 💕"
+          : savedDays.day1 ? "See you on the 24th! 💕"
+          : savedDays.day2 ? "See you on the 25th! 💕"
+          : "Thanks for letting us know 💕"
+        : submitted ? "Thanks for your RSVP! 💕"
+        : null;
       const [adminUnlocked, setAdminUnlocked] = useState(false);
       const [adminPw, setAdminPw] = useState("");
       const [adminPwError, setAdminPwError] = useState(false);
@@ -167,7 +183,7 @@
         if (!valid) return;
         const e = {id:Date.now(),name:form.name.trim(),email:form.email.trim(),attendingDay:form.attendingDay,attendingDay2:form.attendingDay2,allergies:form.allergies.trim(),message:form.message.trim(),submittedAt:new Date().toISOString()};
         const u = [...responses,e];
-        setResponses(u); saveResponses(u); setLastEntry(e); markAsSubmitted(urlToken); setSubmitted(true);
+        setResponses(u); saveResponses(u); setLastEntry(e); markAsSubmitted(urlToken); markDays(urlToken, e.attendingDay, e.attendingDay2); setSubmitted(true);
         try {
           const res = await fetch(WORKER_URL, {
             method: 'POST',
@@ -288,6 +304,7 @@
               <p style={s.heroSub}>We're getting married 💕</p>
               {validInvite && <p style={s.heroDeadline}>Please RSVP by 12th September 2026</p>}
               {validInvite && !submitted && <button className="hero-rsvp-btn" onClick={()=>scrollTo("rsvp")}>RSVP Now</button>}
+              {submitted && heroMsg && <p style={{color:"rgba(255,255,255,0.95)",fontFamily:"'Playfair Display',serif",fontSize:"1.1rem",marginTop:8,fontStyle:"italic"}}>{heroMsg}</p>}
             </div>
             <div style={s.heroFloralBottom}><FloralBorder/></div>
             <div style={s.heroWave}>
@@ -371,15 +388,16 @@
                   <div style={{fontSize:"3rem",marginBottom:16}}>💌</div>
                   <SectionTitle>Thank you!</SectionTitle>
                   <p style={{...s.intro,maxWidth:480,margin:"16px auto 28px"}}>
-                    {lastEntry ? (
+                    {savedDays ? (
                       <>
-                        {lastEntry.attendingDay && <span>We can't wait to see you at the Rose Hotel on the 24th!<br/></span>}
-                        {lastEntry.attendingDay2 && <span>And at Fitzgerald's in Castlegregory on the 25th! 🎶<br/></span>}
-                        {!lastEntry.attendingDay && !lastEntry.attendingDay2 && <span>We're sorry you can't make it — thank you so much for letting us know. 💕</span>}
+                        {savedDays.day1 && <span>We can't wait to see you at the Rose Hotel on the 24th!<br/></span>}
+                        {savedDays.day2 && <span>And at Fitzgerald's in Castlegregory on the 25th! 🎶<br/></span>}
+                        {!savedDays.day1 && !savedDays.day2 && <span>We're sorry you can't make it — thank you so much for letting us know. 💕</span>}
                       </>
                     ) : (
-                      <span>You've already RSVP'd — we can't wait to celebrate with you! 🥂<br/><br/>If you need to make any changes, just get in touch at <a href="mailto:patrickandkatie2026@gmail.com" style={{color:"#8B2442"}}>patrickandkatie2026@gmail.com</a></span>
+                      <span>You've already RSVP'd — we can't wait to celebrate with you! 🥂</span>
                     )}
+                    <br/><br/><span style={{fontSize:"0.85rem"}}>Need to make a change? <a href="mailto:patrickandkatie2026@gmail.com" style={{color:"#8B2442"}}>patrickandkatie2026@gmail.com</a></span>
                   </p>
                 </div>
               )}
