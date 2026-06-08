@@ -225,7 +225,7 @@
         heroDeadline:{display:"inline-block",background:"rgba(255,255,255,0.18)",color:"#fff",padding:"8px 22px",borderRadius:24,fontSize:"0.78rem",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:24,backdropFilter:"blur(4px)"},
         heroWave:{position:"absolute",bottom:0,left:0,right:0,zIndex:1},
         nav:{position:"sticky",top:0,zIndex:100,display:"flex",justifyContent:"center",gap:2,background:"rgba(255,255,255,0.97)",borderBottom:"1px solid #EDD8D8",padding:"0 8px",flexWrap:"wrap",backdropFilter:"blur(8px)"},
-        section:{padding:"64px 24px"},
+        section:{padding:"40px 24px"},
         sectionInner:{maxWidth:820,margin:"0 auto"},
         floralDivider:{maxWidth:820,margin:"0 auto",padding:"0 24px",opacity:0.7},
         intro:{color:"#777",lineHeight:1.8,marginBottom:28,fontSize:"0.95rem"},
@@ -253,7 +253,7 @@
         <div style={s.root}>
           {/* ── Sticky Nav ── */}
           <nav style={s.nav}>
-            {[["story","Our Story"],["schedule","Schedule"],["venues","Venues"],["stay","Stay"],["faqs","FAQs"],...(validInvite||submitted?[["rsvp","RSVP"]]:[])]  .map(([id,label])=>(
+            {[["schedule","The Day"],["venues","Venues"],["stay","Stay"],["faqs","FAQs"],...(validInvite||submitted?[["rsvp","RSVP"]]:[])]  .map(([id,label])=>(
               <button key={id} className="nav-btn" onClick={()=>scrollTo(id)}>{label}</button>
             ))}
           </nav>
@@ -287,53 +287,37 @@
             </div>
           </header>
 
-          {/* ── Our Story ── */}
-          <section ref={sRef("story")} style={s.section}>
+          {/* ── The Day ── */}
+          <section ref={sRef("schedule")} style={s.section}>
             <div style={s.sectionInner}>
               <div style={s.card}>
                 <FloralTL/>
                 <FloralBR/>
-                <div style={{position:"relative",zIndex:1}}>
-                  <SectionTitle>Our Story 💕</SectionTitle>
+                <div style={{position:"relative",zIndex:1,textAlign:"center"}}>
+
+                  <p style={{fontFamily:"'Jost',sans-serif",fontSize:"0.7rem",letterSpacing:"0.22em",textTransform:"uppercase",color:"#bbb",marginBottom:8}}>Day One</p>
+                  <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:"1.5rem",color:"#2c2a26",fontWeight:400,marginBottom:4}}>Saturday 24th October 2026</h3>
                   <RoseDivider/>
-                  <p style={s.storyText}>We're going back to where it all first began. We met each other in Dott's bar in The Rose Hotel on a summer's afternoon. What was meant to be a quick hello after matching online turned into a 3 hour chat — and we're still talking! 🥰</p>
-                  <p style={{...s.storyText,marginTop:16}}>And now here we are, two beautiful girls by our side, ready to start the next chapter together!!! 💕💕💕</p>
+                  <p style={{fontFamily:"'Playfair Display',serif",fontSize:"1.2rem",color:"#8B2442",marginBottom:4}}>The Rose Hotel</p>
+                  <p style={{color:"#aaa",fontSize:"0.82rem",marginBottom:20}}>Dan Spring Road, Tralee, Co. Kerry</p>
+                  <div style={{display:"inline-flex",flexDirection:"column",gap:10,textAlign:"left"}}>
+                    <InviteLine time="2:30pm" detail="Ceremony & Reception"/>
+                    <InviteLine time="Evening" detail="Dinner, dancing & celebrations"/>
+                    <InviteLine time="Late" detail="Party until you can't anymore 🎉"/>
+                  </div>
+
                   <RoseDivider/>
-                  <p style={{...s.storyText,fontStyle:"italic",color:"#A83255"}}>We can't wait to celebrate with all of you. ✨</p>
-                </div>
-              </div>
-            </div>
-          </section>
 
-          <div style={s.floralDivider}><FloralBorder/></div>
+                  <p style={{fontFamily:"'Jost',sans-serif",fontSize:"0.7rem",letterSpacing:"0.22em",textTransform:"uppercase",color:"#bbb",marginBottom:8}}>Day Two</p>
+                  <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:"1.5rem",color:"#2c2a26",fontWeight:400,marginBottom:4}}>Sunday 25th October 2026</h3>
+                  <p style={{color:"#C85820",fontStyle:"italic",fontSize:"0.88rem",marginBottom:12}}>Let's keep the party going — heading west to Katie's home village! 🌊</p>
+                  <p style={{fontFamily:"'Playfair Display',serif",fontSize:"1.2rem",color:"#C85820",marginBottom:4}}>Maurice Fitzgerald's</p>
+                  <p style={{color:"#aaa",fontSize:"0.82rem",marginBottom:20}}>Castlegregory, Co. Kerry</p>
+                  <div style={{display:"inline-flex",flexDirection:"column",gap:10,textAlign:"left"}}>
+                    <InviteLine time="5:30pm" detail="Céol agus craic! 🎶" color="#C85820"/>
+                    <InviteLine time="Midnight" detail="Until the last song is sung 🎵" color="#C85820"/>
+                  </div>
 
-          {/* ── Schedule ── */}
-          <section ref={sRef("schedule")} style={s.section}>
-            <div style={s.sectionInner}>
-              <SectionTitle>Schedule</SectionTitle>
-              <p style={s.intro}>Two days of celebration — here's what to expect.</p>
-
-              <div style={s.dayBlock}>
-                <div style={{...s.dayHeader,background:"linear-gradient(135deg,#8B2442,#C85820)"}}>
-                  <span style={s.dayLabel}>Day 1</span>
-                  <span style={s.dayDate}>Saturday 24th October 2026</span>
-                </div>
-                <div style={s.dayBody}>
-                  <TimelineItem time="2:30 PM" title="Wedding Ceremony & Reception" detail="The Rose Hotel, Dan Spring Road, Tralee — all on site" icon="💍" color="#8B2442"/>
-                  <TimelineItem time="Evening" title="Dinner, dancing & celebrations" detail="The Rose Hotel ballroom" icon="🥂" color="#8B2442"/>
-                  <TimelineItem time="Late" title="End when you can't party anymore 😊" detail="" icon="🎉" color="#8B2442" last={true}/>
-                </div>
-              </div>
-
-              <div style={{...s.dayBlock,borderColor:"#F0D0B0",marginTop:20}}>
-                <div style={{...s.dayHeader,background:"linear-gradient(135deg,#C85820,#D4702A)"}}>
-                  <span style={s.dayLabel}>Day 2 🎉</span>
-                  <span style={s.dayDate}>Sunday 25th October 2026</span>
-                </div>
-                <div style={s.dayBody}>
-                  <p style={{color:"#C85820",fontStyle:"italic",marginBottom:20,fontSize:"0.95rem"}}>Let's keep the party going! We're heading back west to Katie's home village — Castlegregory. 🌊</p>
-                  <TimelineItem time="5:30 PM" title="Day 2 Celebrations — Woohoo! 🎊" detail="Maurice Fitzgerald's, Castlegregory, V92 F6NX" icon="🎶" color="#C85820"/>
-                  <TimelineItem time="Until midnight" title="Céol agus craic 😻😻😻😻" detail="See ye there!" icon="🎵" color="#C85820" last={true}/>
                 </div>
               </div>
             </div>
@@ -516,6 +500,16 @@
     // ── Sub-components ────────────────────────────────────────────────────────
     function SectionTitle({children}) {
       return <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:"clamp(1.6rem,4vw,2.2rem)",color:"#2c2a26",marginBottom:8,fontWeight:400}}>{children}</h2>;
+    }
+
+    function InviteLine({time, detail, color="#8B2442"}) {
+      return (
+        <div style={{display:"flex",alignItems:"baseline",gap:12}}>
+          <span style={{fontFamily:"'Jost',sans-serif",fontSize:"0.78rem",letterSpacing:"0.1em",color,minWidth:56,textAlign:"right",flexShrink:0}}>{time}</span>
+          <span style={{width:1,height:14,background:"#ddd",flexShrink:0,alignSelf:"center"}}/>
+          <span style={{color:"#555",fontSize:"0.9rem"}}>{detail}</span>
+        </div>
+      );
     }
 
     function TimelineItem({time,title,detail,icon,last,color="#8B2442"}) {
