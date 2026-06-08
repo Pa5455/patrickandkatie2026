@@ -68,7 +68,7 @@
     const FITZ_PHOTO = "https://lh3.googleusercontent.com/place-photos/AJRVUZNygulMskpPXKXSujsrAIT9HKUAsY9bQiDBC58yj19cA71RLiziW7xXB-geuykem-pIJkrRxjS4mrrcbnOAY2p0RCSRNnBiciAbmJ4xLBWJ0UmsUMDoqKMWCvrL-8wWi4_A3vPEg8gX1Pdmbw=s4800-w800-h600";
     const ROSE_MAPS = "https://maps.google.com/?cid=5972029357870680948";
     const FITZ_MAPS = "https://maps.google.com/?cid=10139855578156993719";
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwq3bNyaxvv4M2u-6JaorYD1eg5_BV95y0PQh64SIusNMfvM_Xi7yRSq7Q65K8LVhYE/exec";
+    const WORKER_URL = "https://pk-rsvp-worker.patrickcurran48.workers.dev";
 
     // ── Floral decorations ────────────────────────────────────────────────────
     const Flower = ({cx,cy,r,color,petalColor}) => (
@@ -169,17 +169,27 @@
         const u = [...responses,e];
         setResponses(u); saveResponses(u); setLastEntry(e); markAsSubmitted(urlToken); setSubmitted(true);
         try {
-          const params = new URLSearchParams({
-            name: String(e.name || ""),
-            email: String(e.email || ""),
-            attendingDay: e.attendingDay === true ? "true" : "false",
-            attendingDay2: e.attendingDay2 === true ? "true" : "false",
-            allergies: String(e.allergies || ""),
-            message: String(e.message || "")
+          const res = await fetch(WORKER_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              token: urlToken,
+              name: e.name,
+              email: e.email,
+              attendingDay: e.attendingDay,
+              attendingDay2: e.attendingDay2,
+              allergies: e.allergies,
+              message: e.message
+            })
           });
-          await fetch(`${SCRIPT_URL}?${params.toString()}`, { mode: 'no-cors' });
+          const result = await res.json();
+          if (result.duplicate) {
+            setSubmitted(true);
+            setLastEntry(null);
+            return;
+          }
         } catch(err) {
-          console.error("Sheet sync failed:", err);
+          console.error("RSVP sync failed:", err);
         }
       }
 
