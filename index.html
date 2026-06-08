@@ -57,11 +57,11 @@
     function saveResponses(list) {
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch {}
     }
-    function hasAlreadySubmitted() {
-      return localStorage.getItem(SUBMITTED_KEY) === "true";
+    function hasAlreadySubmitted(token) {
+      return localStorage.getItem(SUBMITTED_KEY + '-' + token) === "true";
     }
-    function markAsSubmitted() {
-      localStorage.setItem(SUBMITTED_KEY, "true");
+    function markAsSubmitted(token) {
+      localStorage.setItem(SUBMITTED_KEY + '-' + token, "true");
     }
 
     const ROSE_HOTEL_PHOTO = "https://lh3.googleusercontent.com/place-photos/AJRVUZO0TCs1gOokOCY-aakssQata_UXZ5lrGpD7d93MyE7xnzLhaXugD5biu0vpJBMpwlGOuDadhCqywtgxhMNSjxJizdOtxQMCP4nNetfpE6mcR9yyJtpnnfuubXQBj3xPRU_GurtwXyEeKkOdg4Q=s4800-w800-h600";
@@ -137,9 +137,12 @@
     // ── Main component ────────────────────────────────────────────────────────
     function WeddingSite() {
       const [responses, setResponses] = useState([]);
-      const [submitted, setSubmitted] = useState(hasAlreadySubmitted());
+      const [submitted, setSubmitted] = useState(hasAlreadySubmitted(urlToken));
       const [lastEntry, setLastEntry] = useState(null);
-      const urlName = new URLSearchParams(window.location.search).get('name') || '';
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlName = urlParams.get('name') || '';
+      const urlToken = urlParams.get('token') || '';
+      const validInvite = urlName && urlToken;
       const [form, setForm] = useState({name:urlName,email:"",attendingDay:null,attendingDay2:null,allergies:"",message:""});
       const [adminUnlocked, setAdminUnlocked] = useState(false);
       const [adminPw, setAdminPw] = useState("");
@@ -164,7 +167,7 @@
         if (!valid) return;
         const e = {id:Date.now(),name:form.name.trim(),email:form.email.trim(),attendingDay:form.attendingDay,attendingDay2:form.attendingDay2,allergies:form.allergies.trim(),message:form.message.trim(),submittedAt:new Date().toISOString()};
         const u = [...responses,e];
-        setResponses(u); saveResponses(u); setLastEntry(e); markAsSubmitted(); setSubmitted(true);
+        setResponses(u); saveResponses(u); setLastEntry(e); markAsSubmitted(urlToken); setSubmitted(true);
         try {
           const params = new URLSearchParams({
             name: String(e.name || ""),
@@ -250,7 +253,7 @@
         <div style={s.root}>
           {/* ── Sticky Nav ── */}
           <nav style={s.nav}>
-            {[["story","Our Story"],["schedule","Schedule"],["venues","Venues"],["stay","Stay"],["faqs","FAQs"],...(urlName||submitted?[["rsvp","RSVP"]]:[])]  .map(([id,label])=>(
+            {[["story","Our Story"],["schedule","Schedule"],["venues","Venues"],["stay","Stay"],["faqs","FAQs"],...(validInvite||submitted?[["rsvp","RSVP"]]:[])]  .map(([id,label])=>(
               <button key={id} className="nav-btn" onClick={()=>scrollTo(id)}>{label}</button>
             ))}
           </nav>
@@ -391,7 +394,7 @@
           <div style={s.floralDivider}><FloralBorder/></div>
 
           {/* ── RSVP ── */}
-          <section ref={sRef("rsvp")} style={{...s.section, display: urlName || submitted ? 'block' : 'none'}}>
+          <section ref={sRef("rsvp")} style={{...s.section, display: validInvite || submitted ? 'block' : 'none'}}>
             <div style={s.sectionInner}>
               {!submitted ? (
                 <>
