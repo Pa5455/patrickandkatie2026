@@ -15,7 +15,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
     body { background: #fdf9f5; }
-    .nav-btn { background:none; border:none; cursor:pointer; font-family:'Jost',sans-serif; font-size:0.74rem; letter-spacing:0.14em; text-transform:uppercase; padding:14px 14px; color:#aaa; transition:color 0.2s; border-bottom:2px solid transparent; }
+    .nav-btn { background:none; border:none; cursor:pointer; font-family:'Jost',sans-serif; font-size:0.74rem; letter-spacing:0.14em; text-transform:uppercase; padding:14px 14px; color:#555; transition:color 0.2s; border-bottom:2px solid transparent; font-weight:500; }
     .nav-btn:hover { color:#8B2442; }
     .hero-rsvp-btn { background:rgba(255,255,255,0.95); border:none; border-radius:24px; cursor:pointer; font-family:'Jost',sans-serif; font-size:0.82rem; letter-spacing:0.18em; text-transform:uppercase; padding:14px 36px; color:#8B2442; font-weight:500; transition:all 0.2s; display:inline-block; margin-top:8px; }
     .hero-rsvp-btn:hover { background:#fff; transform:translateY(-2px); box-shadow:0 4px 16px rgba(0,0,0,0.15); }
@@ -263,7 +263,7 @@
         <div style={s.root}>
           {/* ── Sticky Nav ── */}
           <nav style={s.nav}>
-            {[["schedule","The Day"],["venues","Venues"],["stay","Stay"],["faqs","FAQs"],...(validInvite||submitted?[["rsvp","RSVP"]]:[])]  .map(([id,label])=>(
+            {[["schedule","The Day"],...(validInvite||submitted?[["rsvp","RSVP"]]:[]),["venues","Venues"],["stay","Stay"],["faqs","FAQs"]].map(([id,label])=>(
               <button key={id} className="nav-btn" onClick={()=>scrollTo(id)}>{label}</button>
             ))}
           </nav>
@@ -286,8 +286,11 @@
               <p style={s.heroPre}>Saturday · 24th October 2026</p>
               <h1 style={s.heroTitle}>Patrick <span style={s.amp}>&amp;</span> Katie</h1>
               <p style={s.heroSub}>We're getting married 💕</p>
-              <p style={s.heroDeadline}>Please RSVP by 12th September 2026</p>
-              <button className="hero-rsvp-btn" onClick={()=>scrollTo("rsvp")}>RSVP Now</button>
+              {validInvite
+                ? <p style={s.heroDeadline}>Please RSVP by 12th September 2026</p>
+                : <p style={s.heroDeadline}>Questions? <a href="mailto:patrickandkatie2026@gmail.com" style={{color:"rgba(255,255,255,0.9)",textDecoration:"underline"}}>patrickandkatie2026@gmail.com</a></p>
+              }
+              {validInvite && <button className="hero-rsvp-btn" onClick={()=>scrollTo("rsvp")}>RSVP Now</button>}
             </div>
             <div style={s.heroFloralBottom}><FloralBorder/></div>
             <div style={s.heroWave}>
@@ -330,6 +333,59 @@
 
                 </div>
               </div>
+            </div>
+          </section>
+
+          {/* ── RSVP ── */}
+          <section ref={sRef("rsvp")} style={{...s.section, display: validInvite || submitted ? 'block' : 'none'}}>
+            <div style={s.sectionInner}>
+              {!submitted ? (
+                <>
+                  <SectionTitle>RSVP</SectionTitle>
+                  <p style={s.intro}>We would be honoured to celebrate with you. Please let us know by <strong>12th September 2026</strong>.</p>
+                  <div style={s.card}>
+                    <FloralTL/>
+                    <FloralBR/>
+                    <div style={{position:"relative",zIndex:1,display:"flex",flexDirection:"column",gap:18}}>
+                      <div style={s.ff}>
+                        <label style={s.label}>Your Invitation</label>
+                        <div style={{display:"flex",alignItems:"center",gap:12,background:"linear-gradient(135deg,#8B2442,#C85820)",borderRadius:8,padding:"14px 20px"}}>
+                          <span style={{fontSize:"1.3rem"}}>💌</span>
+                          <div>
+                            <p style={{color:"rgba(255,255,255,0.75)",fontSize:"0.65rem",letterSpacing:"0.14em",textTransform:"uppercase",fontFamily:"'Jost',sans-serif",marginBottom:2}}>Invited Guest</p>
+                            <p style={{color:"#fff",fontFamily:"'Playfair Display',serif",fontSize:"1.15rem",fontWeight:400}}>{form.name}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div style={s.ff}><label style={s.label}>Email Address</label><input className="inp" type="email" placeholder="your@email.com" value={form.email} onChange={e=>set("email",e.target.value)}/></div>
+                      <EventRsvp icon="💍" title="Day 1 — Saturday 24th October" venue="The Rose Hotel, Tralee" value={form.attendingDay} onChange={v=>set("attendingDay",v)}/>
+                      <EventRsvp icon="🎶" title="Day 2 — Sunday 25th October" venue="Maurice Fitzgerald's, Castlegregory" value={form.attendingDay2} onChange={v=>set("attendingDay2",v)}/>
+                      <div style={s.ff}>
+                        <label style={s.label}>Food allergies or dietary requirements</label>
+                        <input className="inp" type="text" placeholder="e.g. nut allergy, gluten free, vegetarian — leave blank if none" value={form.allergies} onChange={e=>set("allergies",e.target.value)}/>
+                      </div>
+                      <div style={s.ff}><label style={s.label}>Message for Patrick & Katie 💕</label><textarea className="inp" rows={3} placeholder="Optional note or well wishes…" value={form.message} onChange={e=>set("message",e.target.value)} style={{resize:"none"}}/></div>
+                      <button className={`submit-btn${!valid?" disabled":""}`} onClick={submit} disabled={!valid}>Send RSVP 💌</button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div style={{textAlign:"center",padding:"24px 0"}}>
+                  <div style={{fontSize:"3rem",marginBottom:16}}>💌</div>
+                  <SectionTitle>Thank you!</SectionTitle>
+                  <p style={{...s.intro,maxWidth:480,margin:"16px auto 28px"}}>
+                    {lastEntry ? (
+                      <>
+                        {lastEntry.attendingDay && <span>We can't wait to see you at the Rose Hotel on the 24th!<br/></span>}
+                        {lastEntry.attendingDay2 && <span>And at Fitzgerald's in Castlegregory on the 25th! 🎶<br/></span>}
+                        {!lastEntry.attendingDay && !lastEntry.attendingDay2 && <span>We're sorry you can't make it — thank you so much for letting us know. 💕</span>}
+                      </>
+                    ) : (
+                      <span>You've already RSVP'd — we can't wait to celebrate with you! 🥂<br/><br/>If you need to make any changes, just get in touch at <a href="mailto:patrickandkatie2026@gmail.com" style={{color:"#8B2442"}}>patrickandkatie2026@gmail.com</a></span>
+                    )}
+                  </p>
+                </div>
+              )}
             </div>
           </section>
 
@@ -382,61 +438,6 @@
                   <FAQ q="What time does Day 2 start?" a="Day 2 at Maurice Fitzgerald's kicks off at 5:30 PM on Sunday 25th October and runs until midnight. Céol agus craic! 🎶"/>
                 </div>
               </div>
-            </div>
-          </section>
-
-          <div style={s.floralDivider}><FloralBorder/></div>
-
-          {/* ── RSVP ── */}
-          <section ref={sRef("rsvp")} style={{...s.section, display: validInvite || submitted ? 'block' : 'none'}}>
-            <div style={s.sectionInner}>
-              {!submitted ? (
-                <>
-                  <SectionTitle>RSVP</SectionTitle>
-                  <p style={s.intro}>We would be honoured to celebrate with you. Please let us know by <strong>12th September 2026</strong>.</p>
-                  <div style={s.card}>
-                    <FloralTL/>
-                    <FloralBR/>
-                    <div style={{position:"relative",zIndex:1,display:"flex",flexDirection:"column",gap:18}}>
-                      <div style={s.ff}>
-                        <label style={s.label}>Your Invitation</label>
-                        <div style={{display:"flex",alignItems:"center",gap:12,background:"linear-gradient(135deg,#8B2442,#C85820)",borderRadius:8,padding:"14px 20px"}}>
-                          <span style={{fontSize:"1.3rem"}}>💌</span>
-                          <div>
-                            <p style={{color:"rgba(255,255,255,0.75)",fontSize:"0.65rem",letterSpacing:"0.14em",textTransform:"uppercase",fontFamily:"'Jost',sans-serif",marginBottom:2}}>Invited Guest</p>
-                            <p style={{color:"#fff",fontFamily:"'Playfair Display',serif",fontSize:"1.15rem",fontWeight:400}}>{form.name}</p>
-                          </div>
-                        </div>
-                      </div>
-                      <div style={s.ff}><label style={s.label}>Email Address</label><input className="inp" type="email" placeholder="your@email.com" value={form.email} onChange={e=>set("email",e.target.value)}/></div>
-                      <EventRsvp icon="💍" title="Day 1 — Saturday 24th October" venue="The Rose Hotel, Tralee" value={form.attendingDay} onChange={v=>set("attendingDay",v)}/>
-                      <EventRsvp icon="🎶" title="Day 2 — Sunday 25th October" venue="Maurice Fitzgerald's, Castlegregory" value={form.attendingDay2} onChange={v=>set("attendingDay2",v)}/>
-                      <div style={s.ff}>
-                        <label style={s.label}>Food allergies or dietary requirements</label>
-                        <input className="inp" type="text" placeholder="e.g. nut allergy, gluten free, vegetarian — leave blank if none" value={form.allergies} onChange={e=>set("allergies",e.target.value)}/>
-                      </div>
-                      <div style={s.ff}><label style={s.label}>Message for Patrick & Katie 💕</label><textarea className="inp" rows={3} placeholder="Optional note or well wishes…" value={form.message} onChange={e=>set("message",e.target.value)} style={{resize:"none"}}/></div>
-                      <button className={`submit-btn${!valid?" disabled":""}`} onClick={submit} disabled={!valid}>Send RSVP 💌</button>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div style={{textAlign:"center",padding:"24px 0"}}>
-                  <div style={{fontSize:"3rem",marginBottom:16}}>💌</div>
-                  <SectionTitle>Thank you!</SectionTitle>
-                  <p style={{...s.intro,maxWidth:480,margin:"16px auto 28px"}}>
-                    {lastEntry ? (
-                      <>
-                        {lastEntry.attendingDay && <span>We can't wait to see you at the Rose Hotel on the 24th!<br/></span>}
-                        {lastEntry.attendingDay2 && <span>And at Fitzgerald's in Castlegregory on the 25th! 🎶<br/></span>}
-                        {!lastEntry.attendingDay && !lastEntry.attendingDay2 && <span>We're sorry you can't make it — thank you so much for letting us know. 💕</span>}
-                      </>
-                    ) : (
-                      <span>You've already RSVP'd — thanks so much! 💕<br/>If you need to make a change, please contact us directly at <a href="mailto:patrickandkatie2026@gmail.com" style={{color:"#8B2442"}}>patrickandkatie2026@gmail.com</a></span>
-                    )}
-                  </p>
-                </div>
-              )}
             </div>
           </section>
 
