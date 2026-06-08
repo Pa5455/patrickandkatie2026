@@ -136,13 +136,13 @@
 
     // ── Main component ────────────────────────────────────────────────────────
     function WeddingSite() {
-      const [responses, setResponses] = useState([]);
-      const [submitted, setSubmitted] = useState(hasAlreadySubmitted(urlToken));
-      const [lastEntry, setLastEntry] = useState(null);
       const urlParams = new URLSearchParams(window.location.search);
       const urlName = urlParams.get('name') || '';
       const urlToken = urlParams.get('token') || '';
       const validInvite = urlName && urlToken;
+      const [responses, setResponses] = useState([]);
+      const [submitted, setSubmitted] = useState(hasAlreadySubmitted(urlToken));
+      const [lastEntry, setLastEntry] = useState(null);
       const [form, setForm] = useState({name:urlName,email:"",attendingDay:null,attendingDay2:null,allergies:"",message:""});
       const [adminUnlocked, setAdminUnlocked] = useState(false);
       const [adminPw, setAdminPw] = useState("");
@@ -290,7 +290,7 @@
                 ? <p style={s.heroDeadline}>Please RSVP by 12th September 2026</p>
                 : <p style={s.heroDeadline}>Questions? <a href="mailto:patrickandkatie2026@gmail.com" style={{color:"rgba(255,255,255,0.9)",textDecoration:"underline"}}>patrickandkatie2026@gmail.com</a></p>
               }
-              {validInvite && <button className="hero-rsvp-btn" onClick={()=>scrollTo("rsvp")}>RSVP Now</button>}
+              {validInvite && !submitted && <button className="hero-rsvp-btn" onClick={()=>scrollTo("rsvp")}>RSVP Now</button>}
             </div>
             <div style={s.heroFloralBottom}><FloralBorder/></div>
             <div style={s.heroWave}>
