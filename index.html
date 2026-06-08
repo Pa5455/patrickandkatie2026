@@ -308,7 +308,7 @@
           <section ref={sRef("schedule")} style={s.section}>
             <div style={s.sectionInner}>
               <SectionTitle>Schedule</SectionTitle>
-              <p style={s.intro}>Two days of celebrations — here's what to expect.</p>
+              <p style={s.intro}>Two days of celebration — here's what to expect.</p>
 
               <div style={s.dayBlock}>
                 <div style={{...s.dayHeader,background:"linear-gradient(135deg,#8B2442,#C85820)"}}>
@@ -401,7 +401,16 @@
                     <FloralTL/>
                     <FloralBR/>
                     <div style={{position:"relative",zIndex:1,display:"flex",flexDirection:"column",gap:18}}>
-                      <div style={s.ff}><label style={s.label}>Full Name *</label><input className="inp" type="text" placeholder="Your name" value={form.name} onChange={e=>set("name",e.target.value)}/></div>
+                      <div style={s.ff}>
+                        <label style={s.label}>Your Invitation</label>
+                        <div style={{display:"flex",alignItems:"center",gap:12,background:"linear-gradient(135deg,#8B2442,#C85820)",borderRadius:8,padding:"14px 20px"}}>
+                          <span style={{fontSize:"1.3rem"}}>💌</span>
+                          <div>
+                            <p style={{color:"rgba(255,255,255,0.75)",fontSize:"0.65rem",letterSpacing:"0.14em",textTransform:"uppercase",fontFamily:"'Jost',sans-serif",marginBottom:2}}>Invited Guest</p>
+                            <p style={{color:"#fff",fontFamily:"'Playfair Display',serif",fontSize:"1.15rem",fontWeight:400}}>{form.name}</p>
+                          </div>
+                        </div>
+                      </div>
                       <div style={s.ff}><label style={s.label}>Email Address</label><input className="inp" type="email" placeholder="your@email.com" value={form.email} onChange={e=>set("email",e.target.value)}/></div>
                       <EventRsvp icon="💍" title="Day 1 — Saturday 24th October" venue="The Rose Hotel, Tralee" value={form.attendingDay} onChange={v=>set("attendingDay",v)}/>
                       <EventRsvp icon="🎶" title="Day 2 — Sunday 25th October" venue="Maurice Fitzgerald's, Castlegregory" value={form.attendingDay2} onChange={v=>set("attendingDay2",v)}/>
