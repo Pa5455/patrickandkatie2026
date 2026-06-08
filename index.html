@@ -250,7 +250,7 @@
         <div style={s.root}>
           {/* ── Sticky Nav ── */}
           <nav style={s.nav}>
-            {[["story","Our Story"],["schedule","Schedule"],["venues","Venues"],["stay","Stay"],["faqs","FAQs"],["rsvp","RSVP"]].map(([id,label])=>(
+            {[["story","Our Story"],["schedule","Schedule"],["venues","Venues"],["stay","Stay"],["faqs","FAQs"],...(urlName||submitted?[["rsvp","RSVP"]]:[])]  .map(([id,label])=>(
               <button key={id} className="nav-btn" onClick={()=>scrollTo(id)}>{label}</button>
             ))}
           </nav>
@@ -391,7 +391,7 @@
           <div style={s.floralDivider}><FloralBorder/></div>
 
           {/* ── RSVP ── */}
-          <section ref={sRef("rsvp")} style={s.section}>
+          <section ref={sRef("rsvp")} style={{...s.section, display: urlName || submitted ? 'block' : 'none'}}>
             <div style={s.sectionInner}>
               {!submitted ? (
                 <>
