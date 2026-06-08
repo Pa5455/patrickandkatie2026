@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Patrick & Katie — 24th October 2026</title>
+  <meta name="description" content="Join us to celebrate the wedding of Patrick & Katie on Saturday 24th October 2026 at The Rose Hotel, Tralee."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: #fdf9f5; }
+    .nav-btn { background:none; border:none; cursor:pointer; font-family:'Jost',sans-serif; font-size:0.74rem; letter-spacing:0.14em; text-transform:uppercase; padding:14px 14px; color:#aaa; transition:color 0.2s; border-bottom:2px solid transparent; }
+    .nav-btn:hover { color:#8B2442; }
+    .hero-rsvp-btn { background:rgba(255,255,255,0.95); border:none; border-radius:24px; cursor:pointer; font-family:'Jost',sans-serif; font-size:0.82rem; letter-spacing:0.18em; text-transform:uppercase; padding:14px 36px; color:#8B2442; font-weight:500; transition:all 0.2s; display:inline-block; margin-top:8px; }
+    .hero-rsvp-btn:hover { background:#fff; transform:translateY(-2px); box-shadow:0 4px 16px rgba(0,0,0,0.15); }
+    .inp { background:#faf9f7; border:1px solid #ccc; border-radius:6px; color:#2c2a26; font-family:'Jost',sans-serif; font-size:0.9rem; padding:12px 16px; width:100%; outline:none; transition:border-color 0.2s; }
+    .inp:focus { border-color:#8B2442; background:#fff; }
+    .inp::placeholder { color:#ccc; }
+    .att-btn { flex:1; padding:11px 8px; border:1px solid #ccc; border-radius:6px; background:#fff; cursor:pointer; font-family:'Jost',sans-serif; font-size:0.78rem; letter-spacing:0.08em; text-transform:uppercase; color:#aaa; transition:all 0.2s; }
+    .att-btn:hover { border-color:#8B2442; color:#8B2442; }
+    .att-btn.att-yes { background:#eaf5ea; border-color:#2e7d32; color:#2e7d32; }
+    .att-btn.att-no  { background:#fdf0f0; border-color:#c62828; color:#c62828; }
+    .submit-btn { width:100%; background:linear-gradient(135deg,#8B2442,#C85820); border:none; border-radius:8px; cursor:pointer; font-family:'Jost',sans-serif; font-size:0.82rem; letter-spacing:0.14em; text-transform:uppercase; padding:16px; color:#fff; font-weight:500; transition:opacity 0.2s,transform 0.1s; }
+    .submit-btn:hover:not(.disabled) { opacity:0.9; transform:translateY(-1px); }
+    .submit-btn.disabled { background:#ddd; color:#aaa; cursor:not-allowed; }
+    .dl-btn { background:#fff; border:1px solid #ccc; border-radius:6px; cursor:pointer; font-family:'Jost',sans-serif; font-size:0.78rem; letter-spacing:0.1em; text-transform:uppercase; padding:10px 20px; color:#666; transition:all 0.2s; }
+    .dl-btn:hover { border-color:#8B2442; color:#8B2442; }
+    .del-btn { background:none; border:1px solid #eee; border-radius:4px; cursor:pointer; color:#ccc; font-size:0.72rem; padding:3px 8px; transition:all 0.2s; }
+    .del-btn:hover { border-color:#c62828; color:#c62828; }
+    .dir-toggle { background:none; border:none; cursor:pointer; font-family:'Jost',sans-serif; font-size:0.8rem; letter-spacing:0.1em; text-transform:uppercase; padding:0; transition:opacity 0.2s; }
+    .dir-toggle:hover { opacity:0.7; }
+    @media(max-width:600px) {
+      .nav-btn { padding:12px 8px; font-size:0.65rem; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const STORAGE_KEY = "wedding-rsvp-v4";
+    const SUBMITTED_KEY = "wedding-rsvp-submitted";
+    const ADMIN_PASSWORD = "katie2026";
+
+    function loadResponses() {
+      try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : []; }
+      catch { return []; }
+    }
+    function saveResponses(list) {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch {}
+    }
+    function hasAlreadySubmitted() {
+      return localStorage.getItem(SUBMITTED_KEY) === "true";
+    }
+    function markAsSubmitted() {
+      localStorage.setItem(SUBMITTED_KEY, "true");
+    }
+
+    const ROSE_HOTEL_PHOTO = "https://lh3.googleusercontent.com/place-photos/AJRVUZO0TCs1gOokOCY-aakssQata_UXZ5lrGpD7d93MyE7xnzLhaXugD5biu0vpJBMpwlGOuDadhCqywtgxhMNSjxJizdOtxQMCP4nNetfpE6mcR9yyJtpnnfuubXQBj3xPRU_GurtwXyEeKkOdg4Q=s4800-w800-h600";
+    const FITZ_PHOTO = "https://lh3.googleusercontent.com/place-photos/AJRVUZNygulMskpPXKXSujsrAIT9HKUAsY9bQiDBC58yj19cA71RLiziW7xXB-geuykem-pIJkrRxjS4mrrcbnOAY2p0RCSRNnBiciAbmJ4xLBWJ0UmsUMDoqKMWCvrL-8wWi4_A3vPEg8gX1Pdmbw=s4800-w800-h600";
+    const ROSE_MAPS = "https://maps.google.com/?cid=5972029357870680948";
+    const FITZ_MAPS = "https://maps.google.com/?cid=10139855578156993719";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwq3bNyaxvv4M2u-6JaorYD1eg5_BV95y0PQh64SIusNMfvM_Xi7yRSq7Q65K8LVhYE/exec";
+
+    // ── Floral decorations ────────────────────────────────────────────────────
+    const Flower = ({cx,cy,r,color,petalColor}) => (
+      <>
+        {[0,60,120,180,240,300].map(a=>(
+          <ellipse key={a} cx={cx+Math.cos(a*Math.PI/180)*(r*1.5)} cy={cy+Math.sin(a*Math.PI/180)*(r*1.5)} rx={r*0.9} ry={r*0.55} fill={petalColor} transform={`rotate(${a} ${cx+Math.cos(a*Math.PI/180)*(r*1.5)} ${cy+Math.sin(a*Math.PI/180)*(r*1.5)})`}/>
+        ))}
+        <circle cx={cx} cy={cy} r={r*0.7} fill={color}/>
+      </>
+    );
+
+    const Leaf = ({x1,y1,x2,y2,color="#3a8a50"}) => (
+      <ellipse cx={(x1+x2)/2} cy={(y1+y2)/2} rx={Math.hypot(x2-x1,y2-y1)/2} ry={Math.hypot(x2-x1,y2-y1)/5} fill={color} transform={`rotate(${Math.atan2(y2-y1,x2-x1)*180/Math.PI} ${(x1+x2)/2} ${(y1+y2)/2})`}/>
+    );
+
+    const FloralTL = ({size=130}) => (
+      <svg viewBox="0 0 130 130" width={size} height={size} style={{position:"absolute",top:0,left:0,pointerEvents:"none"}} aria-hidden="true">
+        <Leaf x1={10} y1={60} x2={55} y2={20} color="#2d7a45"/>
+        <Leaf x1={5} y1={80} x2={40} y2={45} color="#3a8a50"/>
+        <Leaf x1={35} y1={10} x2={70} y2={40} color="#2d7a45"/>
+        <Flower cx={60} cy={18} r={14} color="#f5c842" petalColor="#8B2442"/>
+        <Flower cx={20} cy={55} r={12} color="#f5c842" petalColor="#7B1F3A"/>
+        <Flower cx={45} cy={45} r={9} color="#f0b030" petalColor="#E8903A"/>
+        <circle cx={32} cy={28} r={5} fill="#8B2442"/>
+        <circle cx={28} cy={35} r={3} fill="#f5c842"/>
+      </svg>
+    );
+
+    const FloralBR = ({size=130}) => (
+      <svg viewBox="0 0 130 130" width={size} height={size} style={{position:"absolute",bottom:0,right:0,pointerEvents:"none",transform:"rotate(180deg)"}} aria-hidden="true">
+        <Leaf x1={10} y1={60} x2={55} y2={20} color="#2d7a45"/>
+        <Leaf x1={5} y1={80} x2={40} y2={45} color="#3a8a50"/>
+        <Leaf x1={35} y1={10} x2={70} y2={40} color="#2d7a45"/>
+        <Flower cx={60} cy={18} r={14} color="#f5c842" petalColor="#C85820"/>
+        <Flower cx={20} cy={55} r={12} color="#f0b030" petalColor="#7B1F3A"/>
+        <Flower cx={45} cy={45} r={9} color="#f5c842" petalColor="#D4702A"/>
+        <circle cx={32} cy={28} r={5} fill="#7B1F3A"/>
+        <circle cx={28} cy={35} r={3} fill="#f5c842"/>
+      </svg>
+    );
+
+    const FloralBorder = () => (
+      <svg viewBox="0 0 800 40" width="100%" height="40" style={{display:"block"}} aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+        {[60,200,340,460,600,740].map((x,i)=>(
+          <g key={i}>
+            <Flower cx={x} cy={20} r={i%2===0?8:6} color="#f5c842" petalColor={i%3===0?"#8B2442":i%3===1?"#C85820":"#f0a060"}/>
+            <Leaf x1={x-18} y1={20} x2={x-5} y2={12} color="#2d7a45"/>
+            <Leaf x1={x+5} y1={12} x2={x+18} y2={20} color="#3a8a50"/>
+          </g>
+        ))}
+      </svg>
+    );
+
+    const RoseDivider = () => (
+      <div style={{display:"flex",alignItems:"center",gap:10,margin:"24px 0"}}>
+        <div style={{flex:1,height:1,background:"linear-gradient(to right,transparent,#C85820)"}}/>
+        <svg viewBox="0 0 50 24" width={50} height={24} aria-hidden="true">
+          <Flower cx={25} cy={12} r={8} color="#f5c842" petalColor="#8B2442"/>
+          <Leaf x1={8} y1={12} x2={18} y2={6} color="#2d7a45"/>
+          <Leaf x1={32} y1={6} x2={42} y2={12} color="#2d7a45"/>
+        </svg>
+        <div style={{flex:1,height:1,background:"linear-gradient(to left,transparent,#C85820)"}}/>
+      </div>
+    );
+
+    // ── Main component ────────────────────────────────────────────────────────
+    function WeddingSite() {
+      const [responses, setResponses] = useState([]);
+      const [submitted, setSubmitted] = useState(hasAlreadySubmitted());
+      const [lastEntry, setLastEntry] = useState(null);
+      const urlName = new URLSearchParams(window.location.search).get('name') || '';
+      const [form, setForm] = useState({name:urlName,email:"",attendingDay:null,attendingDay2:null,allergies:"",message:""});
+      const [adminUnlocked, setAdminUnlocked] = useState(false);
+      const [adminPw, setAdminPw] = useState("");
+      const [adminPwError, setAdminPwError] = useState(false);
+      const [showAdminLogin, setShowAdminLogin] = useState(false);
+      const footerClickCount = useRef(0);
+      const footerClickTimer = useRef(null);
+      const sectionRefs = useRef({});
+
+      useEffect(() => { setResponses(loadResponses()); }, []);
+
+      function scrollTo(id) {
+        const el = sectionRefs.current[id];
+        if (el) el.scrollIntoView({behavior:"smooth", block:"start"});
+      }
+
+      function set(f,v) { setForm(p=>({...p,[f]:v})); }
+
+      const valid = form.name.trim()&&(form.attendingDay!==null||form.attendingDay2!==null);
+
+      async function submit() {
+        if (!valid) return;
+        const e = {id:Date.now(),name:form.name.trim(),email:form.email.trim(),attendingDay:form.attendingDay,attendingDay2:form.attendingDay2,allergies:form.allergies.trim(),message:form.message.trim(),submittedAt:new Date().toISOString()};
+        const u = [...responses,e];
+        setResponses(u); saveResponses(u); setLastEntry(e); markAsSubmitted(); setSubmitted(true);
+        try {
+          const params = new URLSearchParams({
+            name: String(e.name || ""),
+            email: String(e.email || ""),
+            attendingDay: e.attendingDay === true ? "true" : "false",
+            attendingDay2: e.attendingDay2 === true ? "true" : "false",
+            allergies: String(e.allergies || ""),
+            message: String(e.message || "")
+          });
+          await fetch(`${SCRIPT_URL}?${params.toString()}`, { mode: 'no-cors' });
+        } catch(err) {
+          console.error("Sheet sync failed:", err);
+        }
+      }
+
+      function resetForm() { setForm({name:"",email:"",attendingDay:null,attendingDay2:null,allergies:"",message:""}); setSubmitted(false); setLastEntry(null); }
+      function del(id) { const u=responses.filter(r=>r.id!==id); setResponses(u); saveResponses(u); }
+
+      function handleFooterClick() {
+        footerClickCount.current += 1;
+        clearTimeout(footerClickTimer.current);
+        footerClickTimer.current = setTimeout(()=>{ footerClickCount.current=0; },2000);
+        if (footerClickCount.current >= 5) { footerClickCount.current=0; setShowAdminLogin(true); }
+      }
+
+      function tryAdminLogin() {
+        if (adminPw===ADMIN_PASSWORD) { setAdminUnlocked(true); setShowAdminLogin(false); setAdminPw(""); setAdminPwError(false); setTimeout(()=>scrollTo("admin"),300); }
+        else { setAdminPwError(true); }
+      }
+
+      function downloadCSV() {
+        const header="Name,Email,24th Oct (Day 1),25th Oct (Day 2),Allergies,Message,Submitted\n";
+        const rows=responses.map(r=>`"${r.name}","${r.email}","${r.attendingDay?"Yes":"No"}","${r.attendingDay2?"Yes":"No"}","${r.allergies||""}","${r.message}","${new Date(r.submittedAt).toLocaleDateString()}"`).join("\n");
+        const blob=new Blob([header+rows],{type:"text/csv"});
+        const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="rsvp-responses.csv"; a.click();
+      }
+
+      const day1G=responses.filter(r=>r.attendingDay);
+      const day2G=responses.filter(r=>r.attendingDay2);
+      const total1=day1G.length;
+      const total2=day2G.length;
+
+      function sRef(id) { return el=>{ sectionRefs.current[id]=el; }; }
+
+      const s = {
+        root:{background:"#fdf9f5",minHeight:"100vh",fontFamily:"'Jost',sans-serif",color:"#2c2a26"},
+        hero:{position:"relative",background:"linear-gradient(160deg,#4A1020 0%,#7B1F3A 30%,#C85820 60%,#E8903A 100%)",padding:"100px 24px 120px",textAlign:"center",overflow:"hidden"},
+        heroFloralTop:{position:"absolute",top:0,left:0,right:0,opacity:0.5},
+        heroFloralBottom:{position:"absolute",bottom:60,left:0,right:0,opacity:0.4},
+        heroContent:{position:"relative",zIndex:2},
+        heroPre:{fontFamily:"'Jost',sans-serif",fontSize:"0.8rem",letterSpacing:"0.24em",textTransform:"uppercase",color:"rgba(255,255,255,0.85)",marginBottom:16},
+        heroTitle:{fontFamily:"'Playfair Display',serif",fontSize:"clamp(2.8rem,8vw,5rem)",color:"#fff",fontWeight:400,letterSpacing:"0.02em",lineHeight:1.1,margin:"0 0 14px",textShadow:"0 2px 20px rgba(0,80,80,0.3)"},
+        amp:{color:"rgba(255,255,255,0.7)",fontStyle:"italic"},
+        heroSub:{fontFamily:"'Playfair Display',serif",fontStyle:"italic",fontSize:"1.25rem",color:"rgba(255,255,255,0.9)",marginBottom:24},
+        heroDeadline:{display:"inline-block",background:"rgba(255,255,255,0.18)",color:"#fff",padding:"8px 22px",borderRadius:24,fontSize:"0.78rem",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:24,backdropFilter:"blur(4px)"},
+        heroWave:{position:"absolute",bottom:0,left:0,right:0,zIndex:1},
+        nav:{position:"sticky",top:0,zIndex:100,display:"flex",justifyContent:"center",gap:2,background:"rgba(255,255,255,0.97)",borderBottom:"1px solid #EDD8D8",padding:"0 8px",flexWrap:"wrap",backdropFilter:"blur(8px)"},
+        section:{padding:"64px 24px"},
+        sectionInner:{maxWidth:820,margin:"0 auto"},
+        floralDivider:{maxWidth:820,margin:"0 auto",padding:"0 24px",opacity:0.7},
+        intro:{color:"#777",lineHeight:1.8,marginBottom:28,fontSize:"0.95rem"},
+        card:{background:"#fff",border:"1px solid #EDD8D8",borderRadius:16,padding:"40px 36px",position:"relative",overflow:"hidden",boxShadow:"0 2px 20px rgba(42,138,138,0.08)"},
+        storyText:{color:"#555",lineHeight:1.9,fontSize:"1rem",textAlign:"center"},
+        dayBlock:{border:"1px solid #EDD8D8",borderRadius:12,overflow:"hidden",boxShadow:"0 1px 8px rgba(0,0,0,0.05)"},
+        dayHeader:{padding:"16px 22px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8},
+        dayLabel:{fontFamily:"'Playfair Display',serif",color:"#fff",fontSize:"1.1rem"},
+        dayDate:{color:"rgba(255,255,255,0.85)",fontSize:"0.8rem",letterSpacing:"0.1em",textTransform:"uppercase",fontFamily:"'Jost',sans-serif"},
+        dayBody:{padding:"24px 22px",background:"#fff"},
+        ff:{display:"flex",flexDirection:"column",gap:8},
+        label:{fontSize:"0.73rem",letterSpacing:"0.14em",textTransform:"uppercase",color:"#bbb",fontFamily:"'Jost',sans-serif"},
+        statsGrid:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:24},
+        table:{background:"#fff",border:"1px solid #EDD8D8",borderRadius:8,overflow:"hidden"},
+        tableHead:{display:"flex",gap:12,padding:"12px 18px",background:"#FBF0EE",borderBottom:"1px solid #EDD8D8",fontSize:"0.68rem",letterSpacing:"0.14em",textTransform:"uppercase",color:"#bbb"},
+        tableRow:{display:"flex",gap:12,padding:"14px 18px",borderBottom:"1px solid #f0f5f4",alignItems:"center",fontSize:"0.88rem"},
+        empty:{textAlign:"center",color:"#ccc",fontFamily:"'Playfair Display',serif",fontStyle:"italic",fontSize:"1.1rem",padding:"48px 0"},
+        pill:{display:"inline-block",padding:"6px 14px",borderRadius:20,border:"1px solid #EDD8D8",fontSize:"0.78rem",color:"#555",textDecoration:"none",background:"#FDF5EE"},
+        footer:{textAlign:"center",padding:"36px 24px",borderTop:"1px solid #EDD8D8",background:"#fff",cursor:"default"},
+        modalBg:{position:"fixed",inset:0,background:"rgba(0,0,0,0.45)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000},
+        modal:{background:"#fff",borderRadius:12,padding:"32px 28px",width:"100%",maxWidth:360,boxShadow:"0 8px 32px rgba(0,0,0,0.15)"},
+      };
+
+      return (
+        <div style={s.root}>
+          {/* ── Sticky Nav ── */}
+          <nav style={s.nav}>
+            {[["story","Our Story"],["schedule","Schedule"],["venues","Venues"],["stay","Stay"],["faqs","FAQs"],["rsvp","RSVP"]].map(([id,label])=>(
+              <button key={id} className="nav-btn" onClick={()=>scrollTo(id)}>{label}</button>
+            ))}
+          </nav>
+
+          {/* ── Hero ── */}
+          <header style={s.hero}>
+            <div style={s.heroFloralTop}><FloralBorder/></div>
+            <FloralTL size={150}/>
+            <div style={{position:"absolute",top:0,right:0,pointerEvents:"none"}}>
+              <svg viewBox="0 0 130 130" width={150} height={150} style={{transform:"scaleX(-1)"}} aria-hidden="true">
+                <Leaf x1={10} y1={60} x2={55} y2={20} color="#2d7a45"/>
+                <Leaf x1={5} y1={80} x2={40} y2={45} color="#3a8a50"/>
+                <Leaf x1={35} y1={10} x2={70} y2={40} color="#2d7a45"/>
+                <Flower cx={60} cy={18} r={14} color="#f5c842" petalColor="#8B2442"/>
+                <Flower cx={20} cy={55} r={12} color="#f5c842" petalColor="#7B1F3A"/>
+                <Flower cx={45} cy={45} r={9} color="#f0b030" petalColor="#E8903A"/>
+              </svg>
+            </div>
+            <div style={s.heroContent}>
+              <p style={s.heroPre}>Saturday · 24th October 2026</p>
+              <h1 style={s.heroTitle}>Patrick <span style={s.amp}>&amp;</span> Katie</h1>
+              <p style={s.heroSub}>We're getting married 💕</p>
+              <p style={s.heroDeadline}>Please RSVP by 12th September 2026</p>
+              <button className="hero-rsvp-btn" onClick={()=>scrollTo("rsvp")}>RSVP Now</button>
+            </div>
+            <div style={s.heroFloralBottom}><FloralBorder/></div>
+            <div style={s.heroWave}>
+              <svg viewBox="0 0 1440 60" fill="none" style={{display:"block"}}>
+                <path d="M0,30 C360,60 1080,0 1440,30 L1440,60 L0,60 Z" fill="#fdf9f5"/>
+              </svg>
+            </div>
+          </header>
+
+          {/* ── Our Story ── */}
+          <section ref={sRef("story")} style={s.section}>
+            <div style={s.sectionInner}>
+              <div style={s.card}>
+                <FloralTL/>
+                <FloralBR/>
+                <div style={{position:"relative",zIndex:1}}>
+                  <SectionTitle>Our Story 💕</SectionTitle>
+                  <RoseDivider/>
+                  <p style={s.storyText}>We're going back to where it all first began. We met each other in Dott's bar in The Rose Hotel on a summer's afternoon. What was meant to be a quick hello after matching online turned into a 3 hour chat — and we're still talking! 🥰</p>
+                  <p style={{...s.storyText,marginTop:16}}>And now here we are, two beautiful girls by our side, ready to start the next chapter together!!! 💕💕💕</p>
+                  <RoseDivider/>
+                  <p style={{...s.storyText,fontStyle:"italic",color:"#A83255"}}>We can't wait to celebrate with all of you. ✨</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div style={s.floralDivider}><FloralBorder/></div>
+
+          {/* ── Schedule ── */}
+          <section ref={sRef("schedule")} style={s.section}>
+            <div style={s.sectionInner}>
+              <SectionTitle>Schedule</SectionTitle>
+              <p style={s.intro}>Two days of celebration — here's what to expect.</p>
+
+              <div style={s.dayBlock}>
+                <div style={{...s.dayHeader,background:"linear-gradient(135deg,#8B2442,#C85820)"}}>
+                  <span style={s.dayLabel}>Day 1</span>
+                  <span style={s.dayDate}>Saturday 24th October 2026</span>
+                </div>
+                <div style={s.dayBody}>
+                  <TimelineItem time="2:30 PM" title="Wedding Ceremony & Reception" detail="The Rose Hotel, Dan Spring Road, Tralee — all on site" icon="💍" color="#8B2442"/>
+                  <TimelineItem time="Evening" title="Dinner, dancing & celebrations" detail="The Rose Hotel ballroom" icon="🥂" color="#8B2442"/>
+                  <TimelineItem time="Late" title="End when you can't party anymore 😊" detail="" icon="🎉" color="#8B2442" last={true}/>
+                </div>
+              </div>
+
+              <div style={{...s.dayBlock,borderColor:"#F0D0B0",marginTop:20}}>
+                <div style={{...s.dayHeader,background:"linear-gradient(135deg,#C85820,#D4702A)"}}>
+                  <span style={s.dayLabel}>Day 2 🎉</span>
+                  <span style={s.dayDate}>Sunday 25th October 2026</span>
+                </div>
+                <div style={s.dayBody}>
+                  <p style={{color:"#C85820",fontStyle:"italic",marginBottom:20,fontSize:"0.95rem"}}>Let's keep the party going! We're heading back west to Katie's home village — Castlegregory. 🌊</p>
+                  <TimelineItem time="5:30 PM" title="Day 2 Celebrations — Woohoo! 🎊" detail="Maurice Fitzgerald's, Castlegregory, V92 F6NX" icon="🎶" color="#C85820"/>
+                  <TimelineItem time="Until midnight" title="Céol agus craic 😻😻😻😻" detail="See ye there!" icon="🎵" color="#C85820" last={true}/>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div style={s.floralDivider}><FloralBorder/></div>
+
+          {/* ── Venues ── */}
+          <section ref={sRef("venues")} style={s.section}>
+            <div style={s.sectionInner}>
+              <SectionTitle>Venues</SectionTitle>
+              <VenueCard name="The Rose Hotel" tag="Day 1 · 24th October" tagColor="#8B2442" address="Dan Spring Road, Tralee, Co. Kerry, V92 HKA4" phone="+353 66 719 9100" website="www.therosehotel.com" mapsUrl={ROSE_MAPS} photo={ROSE_HOTEL_PHOTO} note="Where it all began — we met right here in Dott's bar! 🥰" mapEmbed="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2426.5!2d-9.7005558!3d52.2636822!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x485135783100807b%3A0x52e9e90f5016c774!2sThe%20Rose%20Hotel!5e0!3m2!1sen!2sie!4v1" directions={["From Killarney: Take the N22 west into Tralee. At the roundabout near Tralee town centre follow signs for the Rose Hotel on Dan Spring Road.","From Limerick / Dublin: Take the N21 into Tralee. Follow signs for the town centre then the Rose Hotel on Dan Spring Road.","From Dingle / Castlegregory: Take the R559 / N86 into Tralee town. The hotel is well signposted on Dan Spring Road near the town park.","Ample free parking is available at the hotel."]} pill={s.pill}/>
+              <VenueCard name="Maurice Fitzgerald's" tag="Day 2 · 25th October" tagColor="#C85820" address="Castlegregory, Co. Kerry, V92 F6NX" phone="+353 66 713 9951" website="www.mauricefitzgeraldsbar.ie" mapsUrl={FITZ_MAPS} photo={FITZ_PHOTO} note="Katie's home village — céol agus craic! 🎶" mapEmbed="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2427.5!2d-10.0210872!3d52.256261800000004!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x485353152d246dc1%3A0x8cb800e9ecdcf8c!2sFitzgerald's%20Gastropub%20%26%20Hostel!5e0!3m2!1sen!2sie!4v1" directions={["From Tralee: Take the R558 heading west through Camp village. Continue past the Slieve Mish mountains, following signs for Castlegregory.","Fitzgerald's is right in the centre of Castlegregory village — you can't miss it.","The drive from the Rose Hotel takes approximately 25 minutes.","Taxis will be running from Tralee to Castlegregory — book in advance for the 25th."]} pill={s.pill}/>
+            </div>
+          </section>
+
+          <div style={s.floralDivider}><FloralBorder/></div>
+
+          {/* ── Stay ── */}
+          <section ref={sRef("stay")} style={s.section}>
+            <div style={s.sectionInner}>
+              <SectionTitle>Places to Stay</SectionTitle>
+              <p style={s.intro}>Here are some options for both nights. We recommend booking early as October can be busy in Kerry!</p>
+              <StaySection title="Night 1 — Saturday 24th October" subtitle="Stay in Tralee after the Rose Hotel" color="#8B2442" pill={s.pill}>
+                <StayCard name="Benners Hotel" location="Tralee" icon="🏨" desc="Comfortable town centre hotel, short taxi from the Rose Hotel." search="Benners Hotel Tralee" pill={s.pill}/>
+                <StayCard name="Manor West Hotel" location="Tralee" icon="🏨" desc="Modern hotel on the edge of Tralee, good facilities and parking." search="Manor West Hotel Tralee" pill={s.pill}/>
+              </StaySection>
+              <StaySection title="Night 2 — Sunday 25th October" subtitle="Stay near Castlegregory for Day 2" color="#C85820" pill={s.pill}>
+                <StayCard name="The Shores B&B" location="Castlegregory" icon="🌊" desc="Lovely B&B right on the Maharees peninsula with sea views." search="The Shores B&B Castlegregory" pill={s.pill}/>
+                <StayCard name="Beenoshe B&B" location="Castlegregory" icon="🏡" desc="Cosy B&B in Castlegregory village, walking distance from Fitzgerald's." search="Beenoshe B&B Castlegregory" pill={s.pill}/>
+              </StaySection>
+            </div>
+          </section>
+
+          <div style={s.floralDivider}><FloralBorder/></div>
+
+          {/* ── FAQs ── */}
+          <section ref={sRef("faqs")} style={s.section}>
+            <div style={s.sectionInner}>
+              <div style={s.card}>
+                <FloralTL/>
+                <FloralBR/>
+                <div style={{position:"relative",zIndex:1}}>
+                  <SectionTitle>FAQs</SectionTitle>
+                  <RoseDivider/>
+                  <FAQ q="Is there a dress code?" a="Think colourful and comfortable! Have the comfy shoes at the ready — there's going to be a lot of dancing! 💃🕺"/>
+                  <RoseDivider/>
+                  <FAQ q="Is there parking at the Rose Hotel?" a="Yes! There is parking available at the front of the venue and underground group parking too."/>
+                  <RoseDivider/>
+                  <FAQ q="How do I get from Tralee to Castlegregory for Day 2?" a="It's about a 25 minute drive west on the R558 through Camp. Taxis will be running — we'll share details closer to the day!"/>
+                  <RoseDivider/>
+                  <FAQ q="What time does Day 2 start?" a="Day 2 at Maurice Fitzgerald's kicks off at 5:30 PM on Sunday 25th October and runs until midnight. Céol agus craic! 🎶"/>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div style={s.floralDivider}><FloralBorder/></div>
+
+          {/* ── RSVP ── */}
+          <section ref={sRef("rsvp")} style={s.section}>
+            <div style={s.sectionInner}>
+              {!submitted ? (
+                <>
+                  <SectionTitle>RSVP</SectionTitle>
+                  <p style={s.intro}>We would be honoured to celebrate with you. Please let us know by <strong>12th September 2026</strong>.</p>
+                  <div style={s.card}>
+                    <FloralTL/>
+                    <FloralBR/>
+                    <div style={{position:"relative",zIndex:1,display:"flex",flexDirection:"column",gap:18}}>
+                      <div style={s.ff}><label style={s.label}>Full Name *</label><input className="inp" type="text" placeholder="Your name" value={form.name} onChange={e=>set("name",e.target.value)}/></div>
+                      <div style={s.ff}><label style={s.label}>Email Address</label><input className="inp" type="email" placeholder="your@email.com" value={form.email} onChange={e=>set("email",e.target.value)}/></div>
+                      <EventRsvp icon="💍" title="Day 1 — Saturday 24th October" venue="The Rose Hotel, Tralee" value={form.attendingDay} onChange={v=>set("attendingDay",v)}/>
+                      <EventRsvp icon="🎶" title="Day 2 — Sunday 25th October" venue="Maurice Fitzgerald's, Castlegregory" value={form.attendingDay2} onChange={v=>set("attendingDay2",v)}/>
+                      <div style={s.ff}>
+                        <label style={s.label}>Food allergies or dietary requirements</label>
+                        <input className="inp" type="text" placeholder="e.g. nut allergy, gluten free, vegetarian — leave blank if none" value={form.allergies} onChange={e=>set("allergies",e.target.value)}/>
+                      </div>
+                      <div style={s.ff}><label style={s.label}>Message for Patrick & Katie 💕</label><textarea className="inp" rows={3} placeholder="Optional note or well wishes…" value={form.message} onChange={e=>set("message",e.target.value)} style={{resize:"none"}}/></div>
+                      <button className={`submit-btn${!valid?" disabled":""}`} onClick={submit} disabled={!valid}>Send RSVP 💌</button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div style={{textAlign:"center",padding:"24px 0"}}>
+                  <div style={{fontSize:"3rem",marginBottom:16}}>💌</div>
+                  <SectionTitle>Thank you!</SectionTitle>
+                  <p style={{...s.intro,maxWidth:480,margin:"16px auto 28px"}}>
+                    {lastEntry ? (
+                      <>
+                        {lastEntry.attendingDay && <span>We can't wait to see you at the Rose Hotel on the 24th!<br/></span>}
+                        {lastEntry.attendingDay2 && <span>And at Fitzgerald's in Castlegregory on the 25th! 🎶<br/></span>}
+                        {!lastEntry.attendingDay && !lastEntry.attendingDay2 && <span>We're sorry you can't make it — thank you so much for letting us know. 💕</span>}
+                      </>
+                    ) : (
+                      <span>You've already RSVP'd — thanks so much! 💕<br/>If you need to make a change, please contact us directly at <a href="mailto:patrickandkatie2026@gmail.com" style={{color:"#8B2442"}}>patrickandkatie2026@gmail.com</a></span>
+                    )}
+                  </p>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* ── Admin (hidden) ── */}
+          {adminUnlocked && (
+            <section ref={sRef("admin")} style={{padding:"64px 24px",background:"#FBF0EE"}}>
+              <div style={s.sectionInner}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24,flexWrap:"wrap",gap:12}}>
+                  <SectionTitle>Admin — Responses</SectionTitle>
+                  <div style={{display:"flex",gap:10,alignItems:"center"}}>
+                    <button className="dl-btn" onClick={downloadCSV}>⬇ Download CSV</button>
+                    <button className="dl-btn" onClick={()=>setAdminUnlocked(false)} style={{borderColor:"#e08080",color:"#c05050"}}>Lock</button>
+                  </div>
+                </div>
+                <div style={s.statsGrid}>
+                  <StatBox value={responses.length} label="Total RSVPs"/>
+                  <StatBox value={total1} label="Day 1 Guests" color="#8B2442"/>
+                  <StatBox value={total2} label="Day 2 Guests" color="#C85820"/>
+                  <StatBox value={total1+total2} label="Total Attending" color="#c05050"/>
+                </div>
+                {responses.length===0 && <p style={s.empty}>No RSVPs yet!</p>}
+                {responses.length>0 && (
+                  <div style={s.table}>
+                    <div style={s.tableHead}>
+                      {["Name","Email","Day 1","Day 2","Allergies","Message",""].map((h,i)=>(
+                        <span key={i} style={{flex:i===0||i===1||i===4||i===5?2:1,textAlign:i===2||i===3?"center":"left"}}>{h}</span>
+                      ))}
+                    </div>
+                    {responses.map(r=>(
+                      <div key={r.id} style={s.tableRow}>
+                        <span style={{flex:2,fontWeight:500,color:"#2c2a26"}}>{r.name}</span>
+                        <span style={{flex:2,color:"#888",fontSize:"0.82rem"}}>{r.email||"—"}</span>
+                        <span style={{flex:1,textAlign:"center"}}><Tag yes={r.attendingDay}/></span>
+                        <span style={{flex:1,textAlign:"center"}}><Tag yes={r.attendingDay2}/></span>
+                        <span style={{flex:2,color:"#888",fontSize:"0.82rem"}}>{r.allergies||"—"}</span>
+                        <span style={{flex:2,color:"#aaa",fontSize:"0.82rem",fontStyle:"italic"}}>{r.message||"—"}</span>
+                        <span style={{flex:1,textAlign:"right"}}><button className="del-btn" onClick={()=>del(r.id)}>✕</button></span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
+          {/* ── Footer ── */}
+          <footer style={s.footer} onClick={handleFooterClick}>
+            <div style={{fontSize:"1.4rem",marginBottom:6}}>🌸 🌿 🌸</div>
+            <p style={{fontFamily:"'Playfair Display',serif",fontSize:"1.1rem",color:"#8B2442",marginBottom:4}}>Patrick & Katie · 24th October 2026</p>
+            <p style={{fontSize:"0.75rem",color:"#bbb",letterSpacing:"0.1em"}}>Kerry, Ireland 💕</p>
+          </footer>
+
+          {/* ── Admin login modal ── */}
+          {showAdminLogin && (
+            <div style={s.modalBg} onClick={e=>{if(e.target===e.currentTarget){setShowAdminLogin(false);setAdminPw("");setAdminPwError(false);}}}>
+              <div style={s.modal}>
+                <p style={{fontFamily:"'Playfair Display',serif",fontSize:"1.2rem",color:"#2c2a26",marginBottom:16}}>Admin Access</p>
+                <input className="inp" type="password" placeholder="Password" value={adminPw} onChange={e=>{setAdminPw(e.target.value);setAdminPwError(false);}} onKeyDown={e=>e.key==="Enter"&&tryAdminLogin()} autoFocus/>
+                {adminPwError && <p style={{color:"#c62828",fontSize:"0.82rem",marginTop:6}}>Incorrect password</p>}
+                <div style={{display:"flex",gap:10,marginTop:16}}>
+                  <button className="submit-btn" onClick={tryAdminLogin} style={{flex:1,padding:"12px"}}>Unlock</button>
+                  <button className="dl-btn" onClick={()=>{setShowAdminLogin(false);setAdminPw("");setAdminPwError(false);}} style={{flex:1}}>Cancel</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ── Sub-components ────────────────────────────────────────────────────────
+    function SectionTitle({children}) {
+      return <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:"clamp(1.6rem,4vw,2.2rem)",color:"#2c2a26",marginBottom:8,fontWeight:400}}>{children}</h2>;
+    }
+
+    function TimelineItem({time,title,detail,icon,last,color="#8B2442"}) {
+      return (
+        <div style={{display:"flex",gap:16,marginBottom:last?0:24,alignItems:"flex-start"}}>
+          <div style={{display:"flex",flexDirection:"column",alignItems:"center"}}>
+            <div style={{width:40,height:40,borderRadius:"50%",background:"#fff",border:`2px solid ${color}55`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.1rem",flexShrink:0}}>{icon}</div>
+            {!last && <div style={{width:2,flex:1,background:`${color}33`,marginTop:4,minHeight:20}}/>}
+          </div>
+          <div style={{paddingTop:6}}>
+            <p style={{fontSize:"0.75rem",letterSpacing:"0.12em",textTransform:"uppercase",color,fontFamily:"'Jost',sans-serif",marginBottom:2}}>{time}</p>
+            <p style={{fontWeight:600,color:"#2c2a26",fontSize:"0.95rem",marginBottom:2}}>{title}</p>
+            {detail && <p style={{color:"#888",fontSize:"0.85rem"}}>{detail}</p>}
+          </div>
+        </div>
+      );
+    }
+
+    function VenueCard({name,tag,tagColor,address,phone,website,mapsUrl,photo,note,directions,mapEmbed,pill}) {
+      const [open,setOpen] = useState(false);
+      return (
+        <div style={{background:"#fff",border:"1px solid #EDD8D8",borderRadius:12,overflow:"hidden",marginBottom:28,boxShadow:"0 2px 12px rgba(0,0,0,0.06)"}}>
+          <div style={{height:220,overflow:"hidden",position:"relative"}}>
+            <img src={photo} alt={name} style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+          </div>
+          <div style={{padding:"22px 26px"}}>
+            <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:12,marginBottom:4,flexWrap:"wrap"}}>
+              <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:"1.4rem",color:"#2c2a26",fontWeight:400,margin:0}}>{name}</h3>
+              <span style={{background:tagColor,color:"#fff",padding:"4px 14px",borderRadius:20,fontSize:"0.72rem",letterSpacing:"0.1em",textTransform:"uppercase",fontFamily:"'Jost',sans-serif",flexShrink:0,whiteSpace:"nowrap"}}>{tag}</span>
+            </div>
+            {note && <p style={{color:"#A83255",fontSize:"0.85rem",fontStyle:"italic",marginBottom:10}}>{note}</p>}
+            <p style={{color:"#888",fontSize:"0.88rem",marginBottom:14}}>📍 {address}</p>
+            <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:16}}>
+              <a href={`tel:${phone}`} style={pill}>📞 {phone}</a>
+              <a href={`https://${website}`} target="_blank" rel="noreferrer" style={pill}>🌐 {website}</a>
+              <a href={mapsUrl} target="_blank" rel="noreferrer" style={{...pill,background:tagColor,color:"#fff",borderColor:tagColor}}>🗺 Open in Maps</a>
+            </div>
+            <div style={{borderRadius:8,overflow:"hidden",marginBottom:16,border:"1px solid #EDD8D8"}}>
+              <iframe title={`Map for ${name}`} width="100%" height="200" style={{border:0,display:"block"}} loading="lazy" allowFullScreen referrerPolicy="no-referrer-when-downgrade" src={mapEmbed}/>
+            </div>
+            <button className="dir-toggle" onClick={()=>setOpen(o=>!o)} style={{color:tagColor}}>
+              {open?"▲ Hide directions":"▼ Getting there"}
+            </button>
+            {open && <ul style={{marginTop:14,paddingLeft:18}}>{directions.map((d,i)=><li key={i} style={{color:"#666",fontSize:"0.88rem",lineHeight:1.7,marginBottom:6}}>{d}</li>)}</ul>}
+          </div>
+        </div>
+      );
+    }
+
+    function StaySection({title,subtitle,color,children,pill}) {
+      return (
+        <div style={{marginBottom:32}}>
+          <div style={{borderLeft:`3px solid ${color}`,paddingLeft:14,marginBottom:16}}>
+            <p style={{fontWeight:600,color:"#2c2a26",fontSize:"1rem"}}>{title}</p>
+            <p style={{color:"#aaa",fontSize:"0.82rem",marginTop:2}}>{subtitle}</p>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:12}}>{children}</div>
+        </div>
+      );
+    }
+
+    function StayCard({name,location,icon,desc,search,pill}) {
+      return (
+        <div style={{background:"#fff",border:"1px solid #EDD8D8",borderRadius:10,padding:"18px 20px",boxShadow:"0 1px 6px rgba(0,0,0,0.04)"}}>
+          <div style={{fontSize:"1.4rem",marginBottom:8}}>{icon}</div>
+          <p style={{fontWeight:600,color:"#2c2a26",marginBottom:2}}>{name}</p>
+          <p style={{fontSize:"0.78rem",color:"#8B2442",letterSpacing:"0.08em",textTransform:"uppercase",fontFamily:"'Jost',sans-serif",marginBottom:8}}>📍 {location}</p>
+          <p style={{color:"#888",fontSize:"0.84rem",lineHeight:1.6,marginBottom:12}}>{desc}</p>
+          <a href={`https://www.google.com/search?q=${encodeURIComponent(search)}`} target="_blank" rel="noreferrer" style={{...pill,fontSize:"0.75rem"}}>Search online</a>
+        </div>
+      );
+    }
+
+    function FAQ({q,a}) {
+      const [open,setOpen] = useState(false);
+      return (
+        <div>
+          <button onClick={()=>setOpen(o=>!o)} style={{background:"none",border:"none",cursor:"pointer",textAlign:"left",width:"100%",padding:"4px 0",display:"flex",justifyContent:"space-between",alignItems:"center",gap:12}}>
+            <span style={{fontFamily:"'Playfair Display',serif",fontSize:"1.05rem",color:"#2c2a26",fontWeight:400}}>{q}</span>
+            <span style={{color:"#8B2442",fontSize:"1.1rem",flexShrink:0}}>{open?"▲":"▼"}</span>
+          </button>
+          {open && <p style={{color:"#666",lineHeight:1.8,fontSize:"0.9rem",marginTop:8,paddingLeft:4}}>{a}</p>}
+        </div>
+      );
+    }
+
+    function EventRsvp({icon,title,venue,value,onChange}) {
+      return (
+        <div style={{background:"#FBF0EE",border:"1px solid #E8C0C8",borderRadius:8,padding:"16px 18px"}}>
+          <p style={{fontWeight:600,color:"#2c2a26",marginBottom:2}}>{icon} {title}</p>
+          <p style={{fontSize:"0.78rem",color:"#aaa",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:12,fontFamily:"'Jost',sans-serif"}}>{venue}</p>
+          <div style={{display:"flex",gap:10}}>
+            <button className={`att-btn${value===true?" att-yes":""}`} onClick={()=>onChange(true)}>Joyfully Accepts</button>
+            <button className={`att-btn${value===false?" att-no":""}`} onClick={()=>onChange(false)}>Regretfully Declines</button>
+          </div>
+        </div>
+      );
+    }
+
+    function StatBox({value,label,color="#2c2a26"}) {
+      return (
+        <div style={{background:"#fff",border:"1px solid #EDD8D8",borderRadius:8,padding:"20px 16px",textAlign:"center"}}>
+          <p style={{fontFamily:"'Playfair Display',serif",fontSize:"2.2rem",color,fontWeight:400,lineHeight:1}}>{value}</p>
+          <p style={{fontSize:"0.7rem",color:"#aaa",letterSpacing:"0.14em",textTransform:"uppercase",fontFamily:"'Jost',sans-serif",marginTop:6}}>{label}</p>
+        </div>
+      );
+    }
+
+    function Tag({yes}) {
+      if(yes===null||yes===undefined) return <span style={{color:"#ddd",fontSize:"0.75rem"}}>—</span>;
+      return <span style={{display:"inline-block",padding:"2px 10px",borderRadius:20,fontSize:"0.7rem",letterSpacing:"0.08em",textTransform:"uppercase",fontFamily:"'Jost',sans-serif",background:yes?"#eaf5ea":"#fdf0f0",color:yes?"#2e7d32":"#c62828"}}>{yes?"Yes":"No"}</span>;
+    }
+
+    // ── Mount ─────────────────────────────────────────────────────────────────
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<WeddingSite/>);
+  </script>
+</body>
+</html>
