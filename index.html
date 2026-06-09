@@ -147,10 +147,11 @@
       const urlName = urlParams.get('name') || '';
       const urlToken = urlParams.get('token') || '';
       const validInvite = urlName && urlToken;
+      const urlPersons = [1,2,3].map(i=>urlParams.get('p'+i)).filter(Boolean);
       const [responses, setResponses] = useState([]);
       const [submitted, setSubmitted] = useState(hasAlreadySubmitted(urlToken));
       const [lastEntry, setLastEntry] = useState(null);
-      const [form, setForm] = useState({name:urlName,email:"",attendingDay:null,attendingDay2:null,allergies:"",message:""});
+      const [form, setForm] = useState({name:urlName,email:"",attendingDay:null,attendingDay2:null,day1Persons:[],day2Persons:[],allergies:"",message:""});
 
       const savedDays = submitted ? (lastEntry ? {day1:lastEntry.attendingDay,day2:lastEntry.attendingDay2} : getSavedDays(urlToken)) : null;
       const heroMsg = submitted && savedDays
@@ -177,11 +178,15 @@
 
       function set(f,v) { setForm(p=>({...p,[f]:v})); }
 
-      const valid = form.name.trim()&&(form.attendingDay!==null||form.attendingDay2!==null);
+      const valid = form.name.trim()&&(urlPersons.length>0 ? true : (form.attendingDay!==null||form.attendingDay2!==null));
 
       async function submit() {
         if (!valid) return;
-        const e = {id:Date.now(),name:form.name.trim(),email:form.email.trim(),attendingDay:form.attendingDay,attendingDay2:form.attendingDay2,allergies:form.allergies.trim(),message:form.message.trim(),submittedAt:new Date().toISOString()};
+        const day1p = urlPersons.length>0 ? form.day1Persons : null;
+        const day2p = urlPersons.length>0 ? form.day2Persons : null;
+        const attending1 = urlPersons.length>0 ? form.day1Persons.length>0 : form.attendingDay;
+        const attending2 = urlPersons.length>0 ? form.day2Persons.length>0 : form.attendingDay2;
+        const e = {id:Date.now(),name:form.name.trim(),email:form.email.trim(),attendingDay:attending1,attendingDay2:attending2,day1Persons:day1p,day2Persons:day2p,allergies:form.allergies.trim(),message:form.message.trim(),submittedAt:new Date().toISOString()};
         const u = [...responses,e];
         setResponses(u); saveResponses(u); setLastEntry(e); markAsSubmitted(urlToken); markDays(urlToken, e.attendingDay, e.attendingDay2); setSubmitted(true);
         try {
@@ -194,6 +199,8 @@
               email: e.email,
               attendingDay: e.attendingDay,
               attendingDay2: e.attendingDay2,
+              day1Persons: e.day1Persons ? e.day1Persons.join(', ') : '',
+              day2Persons: e.day2Persons ? e.day2Persons.join(', ') : '',
               allergies: e.allergies,
               message: e.message
             })
@@ -209,7 +216,7 @@
         }
       }
 
-      function resetForm() { setForm({name:"",email:"",attendingDay:null,attendingDay2:null,allergies:"",message:""}); setSubmitted(false); setLastEntry(null); }
+      function resetForm() { setForm({name:"",email:"",attendingDay:null,attendingDay2:null,day1Persons:[],day2Persons:[],allergies:"",message:""}); setSubmitted(false); setLastEntry(null); }
       function del(id) { const u=responses.filter(r=>r.id!==id); setResponses(u); saveResponses(u); }
 
       function handleFooterClick() {
@@ -371,8 +378,13 @@
                           </div>
                         </div>
                       </div>
-                      <EventRsvp icon="💍" title="Day 1 — Saturday 24th October" venue="The Rose Hotel, Tralee" value={form.attendingDay} onChange={v=>set("attendingDay",v)}/>
-                      <EventRsvp icon="🎶" title="Day 2 — Sunday 25th October" venue="Maurice Fitzgerald's, Castlegregory" value={form.attendingDay2} onChange={v=>set("attendingDay2",v)}/>
+                      {urlPersons.length>0 ? (<>
+                        <PersonRsvp icon="💍" title="Day 1 — Saturday 24th October" venue="The Rose Hotel, Tralee" persons={urlPersons} selected={form.day1Persons} onChange={v=>setForm(f=>({...f,day1Persons:v,attendingDay:v.length>0}))}/>
+                        <PersonRsvp icon="🎶" title="Day 2 — Sunday 25th October" venue="Maurice Fitzgerald's, Castlegregory" persons={urlPersons} selected={form.day2Persons} onChange={v=>setForm(f=>({...f,day2Persons:v,attendingDay2:v.length>0}))}/>
+                      </>) : (<>
+                        <EventRsvp icon="💍" title="Day 1 — Saturday 24th October" venue="The Rose Hotel, Tralee" value={form.attendingDay} onChange={v=>set("attendingDay",v)}/>
+                        <EventRsvp icon="🎶" title="Day 2 — Sunday 25th October" venue="Maurice Fitzgerald's, Castlegregory" value={form.attendingDay2} onChange={v=>set("attendingDay2",v)}/>
+                      </>)}
                       <div style={s.ff}>
                         <label style={s.label}>Food allergies or dietary requirements</label>
                         <input className="inp" type="text" placeholder="e.g. nut allergy, gluten free, vegetarian — leave blank if none" value={form.allergies} onChange={e=>set("allergies",e.target.value)}/>
@@ -631,6 +643,28 @@
           <div style={{display:"flex",gap:10}}>
             <button className={`att-btn${value===true?" att-yes":""}`} onClick={()=>onChange(true)}>Joyfully Accepts</button>
             <button className={`att-btn${value===false?" att-no":""}`} onClick={()=>onChange(false)}>Regretfully Declines</button>
+          </div>
+        </div>
+      );
+    }
+
+    function PersonRsvp({icon,title,venue,persons,selected,onChange}) {
+      function toggle(person) {
+        const next = selected.includes(person) ? selected.filter(p=>p!==person) : [...selected,person];
+        onChange(next);
+      }
+      return (
+        <div style={{background:"#FBF0EE",border:"1px solid #E8C0C8",borderRadius:8,padding:"16px 18px"}}>
+          <p style={{fontWeight:600,color:"#2c2a26",marginBottom:2}}>{icon} {title}</p>
+          <p style={{fontSize:"0.78rem",color:"#aaa",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:12,fontFamily:"'Jost',sans-serif"}}>{venue}</p>
+          <div style={{display:"flex",flexDirection:"column",gap:10}}>
+            {persons.map(person=>(
+              <label key={person} style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}}>
+                <input type="checkbox" checked={selected.includes(person)} onChange={()=>toggle(person)}
+                  style={{width:18,height:18,accentColor:"#8B2442",cursor:"pointer"}}/>
+                <span style={{fontSize:"0.95rem",color:"#2c2a26"}}>{person}</span>
+              </label>
+            ))}
           </div>
         </div>
       );
