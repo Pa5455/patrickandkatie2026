@@ -151,7 +151,7 @@
       const [responses, setResponses] = useState([]);
       const [submitted, setSubmitted] = useState(hasAlreadySubmitted(urlToken));
       const [lastEntry, setLastEntry] = useState(null);
-      const [form, setForm] = useState({name:urlName,email:"",attendingDay:null,attendingDay2:null,day1Persons:[],day2Persons:[],declined:[],allergies:"",message:""});
+      const [form, setForm] = useState({name:urlName,email:"",attendingDay:null,attendingDay2:null,day1Yes:[],day1No:[],day2Yes:[],day2No:[],allergies:"",message:""});
 
       const savedDays = submitted ? (lastEntry ? {day1:lastEntry.attendingDay,day2:lastEntry.attendingDay2} : getSavedDays(urlToken)) : null;
       const heroMsg = submitted && savedDays
@@ -178,14 +178,14 @@
 
       function set(f,v) { setForm(p=>({...p,[f]:v})); }
 
-      const valid = form.name.trim()&&(urlPersons.length>0 ? urlPersons.every(p=>form.day1Persons.includes(p)||form.day2Persons.includes(p)||form.declined.includes(p)) : (form.attendingDay!==null||form.attendingDay2!==null));
+      const valid = form.name.trim()&&(urlPersons.length>0 ? urlPersons.every(p=>(form.day1Yes.includes(p)||form.day1No.includes(p))&&(form.day2Yes.includes(p)||form.day2No.includes(p))) : (form.attendingDay!==null||form.attendingDay2!==null));
 
       async function submit() {
         if (!valid) return;
-        const day1p = urlPersons.length>0 ? form.day1Persons : null;
-        const day2p = urlPersons.length>0 ? form.day2Persons : null;
-        const attending1 = urlPersons.length>0 ? form.day1Persons.length>0 : form.attendingDay;
-        const attending2 = urlPersons.length>0 ? form.day2Persons.length>0 : form.attendingDay2;
+        const day1p = urlPersons.length>0 ? form.day1Yes : null;
+        const day2p = urlPersons.length>0 ? form.day2Yes : null;
+        const attending1 = urlPersons.length>0 ? form.day1Yes.length>0 : form.attendingDay;
+        const attending2 = urlPersons.length>0 ? form.day2Yes.length>0 : form.attendingDay2;
         const e = {id:Date.now(),name:form.name.trim(),email:form.email.trim(),attendingDay:attending1,attendingDay2:attending2,day1Persons:day1p,day2Persons:day2p,allergies:form.allergies.trim(),message:form.message.trim(),submittedAt:new Date().toISOString()};
         const u = [...responses,e];
         setResponses(u); saveResponses(u); setLastEntry(e); markAsSubmitted(urlToken); markDays(urlToken, e.attendingDay, e.attendingDay2); setSubmitted(true);
@@ -216,7 +216,7 @@
         }
       }
 
-      function resetForm() { setForm({name:"",email:"",attendingDay:null,attendingDay2:null,day1Persons:[],day2Persons:[],declined:[],allergies:"",message:""}); setSubmitted(false); setLastEntry(null); }
+      function resetForm() { setForm({name:"",email:"",attendingDay:null,attendingDay2:null,day1Yes:[],day1No:[],day2Yes:[],day2No:[],allergies:"",message:""}); setSubmitted(false); setLastEntry(null); }
       function del(id) { const u=responses.filter(r=>r.id!==id); setResponses(u); saveResponses(u); }
 
       function handleFooterClick() {
@@ -379,23 +379,8 @@
                         </div>
                       </div>
                       {urlPersons.length>0 ? (<>
-                        <PersonRsvp icon="💍" title="Day 1 — Saturday 24th October" venue="The Rose Hotel, Tralee" persons={urlPersons} selected={form.day1Persons} onChange={v=>setForm(f=>({...f,day1Persons:v,attendingDay:v.length>0,declined:f.declined.filter(p=>!v.includes(p))}))}/>
-                        <PersonRsvp icon="🎶" title="Day 2 — Sunday 25th October" venue="Maurice Fitzgerald's, Castlegregory" persons={urlPersons} selected={form.day2Persons} onChange={v=>setForm(f=>({...f,day2Persons:v,attendingDay2:v.length>0,declined:f.declined.filter(p=>!v.includes(p))}))}/>
-                        {urlPersons.some(p=>!form.day1Persons.includes(p)&&!form.day2Persons.includes(p)) && (
-                          <div style={{background:"#f9f5f7",border:"1px solid #e8d0d8",borderRadius:8,padding:"10px 14px"}}>
-                            <p style={{fontSize:"0.78rem",color:"#8B2442",fontWeight:600,marginBottom:8,letterSpacing:"0.04em"}}>Can't make it?</p>
-                            <div style={{display:"flex",flexDirection:"row",gap:16,flexWrap:"wrap"}}>
-                              {urlPersons.filter(p=>!form.day1Persons.includes(p)&&!form.day2Persons.includes(p)).map(p=>(
-                                <label key={p} style={{display:"flex",alignItems:"center",gap:7,cursor:"pointer"}}>
-                                  <input type="checkbox" checked={form.declined.includes(p)}
-                                    onChange={()=>{const next=form.declined.includes(p)?form.declined.filter(x=>x!==p):[...form.declined,p];setForm(f=>({...f,declined:next}));}}
-                                    style={{width:18,height:18,accentColor:"#8B2442",cursor:"pointer"}}/>
-                                  <span style={{fontSize:"0.92rem",color:"#2c2a26"}}>{p.split(' ')[0]}</span>
-                                </label>
-                              ))}
-                            </div>
-                          </div>
-                        )}
+                        <PersonRsvp icon="💍" title="Day 1 — Saturday 24th October" venue="The Rose Hotel, Tralee" persons={urlPersons} yes={form.day1Yes} no={form.day1No} onYes={p=>setForm(f=>({...f,day1Yes:f.day1Yes.includes(p)?f.day1Yes:[...f.day1Yes,p],day1No:f.day1No.filter(x=>x!==p)}))} onNo={p=>setForm(f=>({...f,day1No:f.day1No.includes(p)?f.day1No:[...f.day1No,p],day1Yes:f.day1Yes.filter(x=>x!==p)}))}/>
+                        <PersonRsvp icon="🎶" title="Day 2 — Sunday 25th October" venue="Maurice Fitzgerald's, Castlegregory" persons={urlPersons} yes={form.day2Yes} no={form.day2No} onYes={p=>setForm(f=>({...f,day2Yes:f.day2Yes.includes(p)?f.day2Yes:[...f.day2Yes,p],day2No:f.day2No.filter(x=>x!==p)}))} onNo={p=>setForm(f=>({...f,day2No:f.day2No.includes(p)?f.day2No:[...f.day2No,p],day2Yes:f.day2Yes.filter(x=>x!==p)}))}/>
                       </>) : (<>
                         <EventRsvp icon="💍" title="Day 1 — Saturday 24th October" venue="The Rose Hotel, Tralee" value={form.attendingDay} onChange={v=>set("attendingDay",v)}/>
                         <EventRsvp icon="🎶" title="Day 2 — Sunday 25th October" venue="Maurice Fitzgerald's, Castlegregory" value={form.attendingDay2} onChange={v=>set("attendingDay2",v)}/>
@@ -405,10 +390,8 @@
                         <input className="inp" type="email" placeholder="e.g. john@example.com" value={form.email} onChange={e=>set("email",e.target.value)}/>
                       </div>
                       <div style={s.ff}>
-                        <label style={s.label}>Food allergies or dietary requirements</label>
-                        <input className="inp" type="text" placeholder="e.g. nut allergy, gluten free, vegetarian — leave blank if none" value={form.allergies} onChange={e=>set("allergies",e.target.value)}/>
+                        <ExtraFields form={form} set={set}/>
                       </div>
-                      <div style={s.ff}><label style={s.label}>Message for Patrick & Katie 💕</label><textarea className="inp" rows={3} placeholder="Optional note or well wishes…" value={form.message} onChange={e=>set("message",e.target.value)} style={{resize:"none"}}/></div>
                       <p style={{fontSize:"0.72rem",color:"#bbb",textAlign:"center",letterSpacing:"0.06em"}}>Select your attendance above, then hit send</p>
                       <button className={`submit-btn${!valid?" disabled":""}`} onClick={submit} disabled={!valid}>Send RSVP 💌</button>
                     </div>
@@ -667,24 +650,48 @@
       );
     }
 
-    function PersonRsvp({icon,title,venue,persons,selected,onChange}) {
-      function toggle(person) {
-        const next = selected.includes(person) ? selected.filter(p=>p!==person) : [...selected,person];
-        onChange(next);
-      }
+    function PersonRsvp({icon,title,venue,persons,yes,no,onYes,onNo}) {
       return (
         <div style={{background:"#FBF0EE",border:"1px solid #E8C0C8",borderRadius:8,padding:"10px 14px"}}>
           <p style={{fontWeight:600,color:"#2c2a26",marginBottom:1,fontSize:"0.92rem"}}>{icon} {title}</p>
           <p style={{fontSize:"0.72rem",color:"#aaa",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:8,fontFamily:"'Jost',sans-serif"}}>{venue}</p>
-          <div style={{display:"flex",flexDirection:"row",gap:16,flexWrap:"wrap"}}>
-            {persons.map(person=>(
-              <label key={person} style={{display:"flex",alignItems:"center",gap:7,cursor:"pointer"}}>
-                <input type="checkbox" checked={selected.includes(person)} onChange={()=>toggle(person)}
-                  style={{width:18,height:18,accentColor:"#8B2442",cursor:"pointer"}}/>
-                <span style={{fontSize:"0.92rem",color:"#2c2a26"}}>{person.split(' ')[0]}</span>
-              </label>
-            ))}
+          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+            {persons.map(person=>{
+              const isYes = yes.includes(person);
+              const isNo = no.includes(person);
+              return (
+                <div key={person} style={{display:"flex",alignItems:"center",gap:10}}>
+                  <span style={{fontSize:"0.92rem",color:"#2c2a26",minWidth:70}}>{person.split(' ')[0]}</span>
+                  <button type="button" onClick={()=>onYes(person)} style={{padding:"5px 18px",borderRadius:20,border:"2px solid",borderColor:isYes?"#2e7d32":"#ddd",background:isYes?"#eaf5ea":"#fff",color:isYes?"#2e7d32":"#aaa",fontFamily:"'Jost',sans-serif",fontSize:"0.8rem",fontWeight:500,cursor:"pointer",transition:"all 0.15s"}}>Yes</button>
+                  <button type="button" onClick={()=>onNo(person)} style={{padding:"5px 18px",borderRadius:20,border:"2px solid",borderColor:isNo?"#c62828":"#ddd",background:isNo?"#fdf0f0":"#fff",color:isNo?"#c62828":"#aaa",fontFamily:"'Jost',sans-serif",fontSize:"0.8rem",fontWeight:500,cursor:"pointer",transition:"all 0.15s"}}>No</button>
+                </div>
+              );
+            })}
           </div>
+        </div>
+      );
+    }
+
+    function ExtraFields({form, set}) {
+      const [open, setOpen] = React.useState(false);
+      return (
+        <div>
+          <button type="button" onClick={()=>setOpen(o=>!o)} style={{background:"none",border:"none",cursor:"pointer",fontFamily:"'Jost',sans-serif",fontSize:"0.78rem",color:"#8B2442",letterSpacing:"0.08em",padding:"0",display:"flex",alignItems:"center",gap:6}}>
+            <span style={{fontSize:"0.9rem"}}>{open ? "▾" : "▸"}</span>
+            Dietary requirements or message (optional)
+          </button>
+          {open && (
+            <div style={{marginTop:10,display:"flex",flexDirection:"column",gap:12}}>
+              <div style={s.ff}>
+                <label style={s.label}>Food allergies or dietary requirements</label>
+                <input className="inp" type="text" placeholder="e.g. nut allergy, gluten free, vegetarian" value={form.allergies} onChange={e=>set("allergies",e.target.value)}/>
+              </div>
+              <div style={s.ff}>
+                <label style={s.label}>Message for Patrick & Katie 💕</label>
+                <textarea className="inp" rows={3} placeholder="Optional note or well wishes…" value={form.message} onChange={e=>set("message",e.target.value)} style={{resize:"none"}}/>
+              </div>
+            </div>
+          )}
         </div>
       );
     }
