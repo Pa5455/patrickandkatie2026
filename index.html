@@ -674,6 +674,8 @@
 
     function ExtraFields({form, set}) {
       const [open, setOpen] = React.useState(false);
+      const ff = {display:"flex",flexDirection:"column",gap:4};
+      const lbl = {fontSize:"0.72rem",letterSpacing:"0.08em",textTransform:"uppercase",color:"#8B2442",fontWeight:600};
       return (
         <div>
           <button type="button" onClick={()=>setOpen(o=>!o)} style={{background:"none",border:"none",cursor:"pointer",fontFamily:"'Jost',sans-serif",fontSize:"0.78rem",color:"#8B2442",letterSpacing:"0.08em",padding:"0",display:"flex",alignItems:"center",gap:6}}>
@@ -682,12 +684,12 @@
           </button>
           {open && (
             <div style={{marginTop:10,display:"flex",flexDirection:"column",gap:12}}>
-              <div style={s.ff}>
-                <label style={s.label}>Food allergies or dietary requirements</label>
+              <div style={ff}>
+                <label style={lbl}>Food allergies or dietary requirements</label>
                 <input className="inp" type="text" placeholder="e.g. nut allergy, gluten free, vegetarian" value={form.allergies} onChange={e=>set("allergies",e.target.value)}/>
               </div>
-              <div style={s.ff}>
-                <label style={s.label}>Message for Patrick & Katie 💕</label>
+              <div style={ff}>
+                <label style={lbl}>Message for Patrick & Katie 💕</label>
                 <textarea className="inp" rows={3} placeholder="Optional note or well wishes…" value={form.message} onChange={e=>set("message",e.target.value)} style={{resize:"none"}}/>
               </div>
             </div>
